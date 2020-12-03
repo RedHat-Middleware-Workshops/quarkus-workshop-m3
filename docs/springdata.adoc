@@ -87,7 +87,7 @@ Open a new CodeReady Workspaces Terminal and run the following commands to add t
 
 [source,console,role="copypaste"]
 ----
-mvn -q quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-labs/quarkus-petclinic
+mvn -q quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
 
 You should see:

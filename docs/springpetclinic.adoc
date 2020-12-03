@@ -71,7 +71,7 @@ Step through the prompts, using the following value for **Repository URL**. If y
 
 [source,none,role="copypaste"]
 ----
-https://github.com/RedHat-Middleware-Workshops/quarkus-workshop-labs
+https://github.com/RedHat-Middleware-Workshops/quarkus-workshop-m3-labs
 ----
 
 image::crw-clone-repo.png[crw,900]
@@ -86,7 +86,7 @@ To make sure you're using the right version of the project files, run this comma
 
 [source,sh,role="copypaste"]
 ----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-labs && git checkout rhtr2020
+cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs && git checkout ocp-4.6
 ----
 
 The project is imported into your workspace and is visible in the project explorer:
@@ -99,7 +99,7 @@ Let's run the Spring Petclinic application. in a CodeReady Terminal:
 
 [source,sh,role="copypaste"]
 ----
-mvn spring-boot:run -f $CHE_PROJECTS_ROOT/quarkus-workshop-labs/spring-petclinic
+mvn spring-boot:run -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/spring-petclinic
 ----
 
 [NOTE]

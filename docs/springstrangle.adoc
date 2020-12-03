@@ -128,7 +128,7 @@ image::cmd-terminal.png[codeready-workspace-terminal, 700]
 +
 [source,sh,role="copypaste"]
 ----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-labs/quarkus-petclinic-vets-service
+cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
 
 . Run the service with the following command:

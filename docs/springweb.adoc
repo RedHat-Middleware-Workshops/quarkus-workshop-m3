@@ -31,7 +31,7 @@ Open a new terminal in CodeReady Workspaces then run the following `mvn` (Maven)
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:dev -f $CHE_PROJECTS_ROOT/quarkus-workshop-labs/quarkus-petclinic
+mvn quarkus:dev -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
 
 Leave this terminal window open throughout the lab! You will complete the entire lab without shutting down Quarkus Live Coding mode, so be careful not to close the tab (if you do, you re-run it). This is very useful for quick expermentation.
@@ -151,7 +151,7 @@ You might see the following error in CodeReady Workspace Terminal. It happened b
 
 [source,console]
 ----
-Failed to copy resources: java.nio.file.NoSuchFileException: /projects/quarkus-workshop-labs/quarkus-petclinic/target/classes/META-INF/resources/index.html
+Failed to copy resources: java.nio.file.NoSuchFileException: /projects/quarkus-workshop-m3-labs/quarkus-petclinic/target/classes/META-INF/resources/index.html
 ----
 ====
 
