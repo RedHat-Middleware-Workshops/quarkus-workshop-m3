@@ -1,0 +1,189 @@
+= Spring DI to Quarkus CDI
+:experimental:
+
+Spring framework provides a *Dependency Injection(DI)* container that enables you to inject required objects into other objects. Dependency injection is a pattern to implement IoC(Inversion of Control), where the control being inverted is the setting of the object's dependencies with the following advantages:
+
+* Decoupling the execution of a task from its implementation
+* Making it easier to switch between different implementations
+* Better modularity of a program
+* Easier in testing a program by isolating a component or mocking its dependencies
+
+== Goals of this lab
+
+The goal is to refactor *Spring DI* application to *Quarkus CDI* for the Controller layers. After this lab, you should end up with something like:
+
+image::spring2quarkus-cdi-diagram.png[quarkus, 900]
+
+Let’s take a look at how the Spring DI is implemented. Multiple Dependency Injections are already used in the Spring Petclinic application through constructors, setters or fields. For example, Open a `PetTypeFormatter.java` class file in `src/main/java/org/springframework/samples/petclinic/owner` then you shoud see:
+
+[source,java]
+----
+@Component // <1>
+public class PetTypeFormatter implements Formatter<PetType> {
+
+	private final PetRepository pets;
+
+	@Autowired // <2>
+	public PetTypeFormatter(PetRepository pets) {
+		this.pets = pets;
+	}
+
+	@Override
+	public String print(PetType petType, Locale locale) {
+		return petType.getName();
+	}
+
+	@Override
+	public PetType parse(String text, Locale locale) throws ParseException {
+		Collection<PetType> findPetTypes = this.pets.findPetTypes();
+		for (PetType type : findPetTypes) {
+			if (type.getName().equals(text)) {
+				return type;
+			}
+		}
+		throw new ParseException("type not found: " + text, 0);
+	}
+
+}
+----
+
+<1> *@Component* annotation indicates that this class(i.e. PetTypeFormatter) is a _component_ that is considered as candidates for auto-detection when using annotation-based configuration and classpath scanning.
+<2> *@Autowired* annotation is applied on a bean constructor to inject _PetRepository_ object. Autowiring Dependency allows the Spring container to automatically resolve dependencies between collaborating beans by inspecting the beans that have been defined.
+
+In this lab, we'll refactor the *Spring DI* to *Quarkus CDI* that is the basic principles of the Quarkus programming model that is based on ArC which is a CDI-based dependency injection solution tailored for Quarkus' architecture. If you’re new to CDI then we recommend you to read the https://quarkus.io/guides/cdi[Introduction to CDI^] guide. Quarkus only implements a subset of the CDI features and comes with non-standard features and specific APIS, you can learn more about it in the https://quarkus.io/guides/cdi-reference[Contexts and Dependency Injection guide^]. Besides, *ArC* comes as a dependency of _quarkus-resteasy_ so you already have it handy.
+
+== Add CDI Injection to Vets
+
+The first step is to define the model(POJO) bean for store Vet object. We'll add identical attributes to the _Vet_ java class in Spring Petclic.
+
+Open an empty `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// TODO: Import packages
+
+// TODO: Add Entity and Cacheable annotation
+public class Vet {
+
+    // TODO: Add Column and NotEmpty annotation for firstName
+    public String firstName;
+
+    // TODO: Add Column and NotEmpty annotation for lastName
+    public String lastName;
+
+    // TODO: Add the list of Specialty
+
+    public String getFirstName() {
+        return this.firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+    public String getLastName() {
+        return this.lastName;
+    }
+    public void setLasttName(String lastName) {
+        this.lastName = lastName;
+    }
+    public static List<Vet> listAll(){
+        Vet vet = new Vet();
+        vet.setFirstName("Daniel");
+        vet.setLasttName("Oh");
+        List vets = new ArrayList<Vet>();
+        vets.add(vet);
+        return vets;
+    }
+
+}
+----
+
+[NOTE]
+====
+We'll remove getter, setter, listAll methods when we refactor this _POJO_ bean class to _Entity_ bean class using Quarkus Hibernate with Panache in the next lab.
+====
+
+Create a CDI bean to retrieve the _Vet_ object. Open an empty `VetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.service;
+
+import java.util.List;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import org.acme.model.Vet;
+
+@ApplicationScoped // <1>
+public class VetsService {
+   
+    public List<Vet> getAll() {
+        return Vet.listAll();
+    }
+
+}
+----
+
+<1> This is a scope annotation. It tells the container which context to associate the bean instance with. In this particular case, a single bean instance is created for the application and used by all other beans that inject *VetsService*.
+
+Edit the `VetsResource.java` class to inject the VetsService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
+
+[source,java,role="copypaste"]
+----
+    @Inject // <1>
+    VetsService service; // <2>
+----
+
+<1> Use *@Inject* for Contexts and Dependency Injection (CDI) similar to Spring DI using *@Autowired* in _Spring Petclinic_ application.
+<2> This is a field injection point. It tells the container that *VetsResource* depends on the *VetsService* bean. If there is no matching bean the build fails.
+
+Replace `null` variable with `service.getAll()` in *TemplateInstance get()* method to invoke _VetsService_. It should look like:
+
+[source,java]
+----
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance get() {
+        return vets.data("active", "vets")
+                .data("vets", service.getAll());
+    }
+----
+
+Also, don’t forget to add the import statement by un-commenting the import statement for *VetsResource* near the top:
+
+[source,java]
+----
+import org.acme.service.VetsService;
+----
+ 
+Edit the presentation layer to list dummy data(Vet). Open the `vets.html` in `src/main/resources/templates`, and add the following code under `<!-- TODO: Add a for loop to list vets -->` the comment:
+
+[source,html,role="copypaste"]
+----
+        {#for vet in vets} 
+            <tr>
+                <td>{vet.firstName} {vet.lastName}</td>      
+                {#if vet.specialties.isEmpty}
+                    <td><span>none</span></td>
+                {#else}
+                    <td>
+                    <!-- TODO: Add a for loop to list specialty -->
+                    none
+                    </td>
+                {/if}
+            </tr>
+        {/for} 
+----
+
+Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page with dummy data:
+
+image::quarkus-petclinic-vets-cdi.png[quarkus-petclinic, 900]
+
+== Congratulations!
+
+You've learned how to simply refactor *Spring DI* to *Quarkus CDI* using *Quarkus RESTEasy Extension*. Note that you still need to create more CDI beans for injecting to the other services such as _Owners_, _Visits_, and _Pets_. We'll do it while we refactor Spring JPA to Quarkus Hibernate ORM with Panache for handling data transaction in the next lab.

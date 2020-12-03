@@ -1,0 +1,15 @@
+modules:
+  springenv:
+    name: Your Workshop Environment
+  springpetclinic:
+    name: Getting Started with Spring Petclinic
+  springweb:
+    name: Spring Web to Quarkus Qute
+  springdi:
+    name: Spring DI to Quarkus CDI
+  springdata:
+    name: Spring Data JPA to Quarkus Hibernate ORM with Panache
+  springstrangle:
+    name: Strangling the Spring Monolith with Quarkus
+  springcloud:
+    name: Spring Cloud to Quarkus on OpenShift

@@ -1,0 +1,1331 @@
+= Spring Data JPA to Quarkus Hibernate ORM with Panache
+:experimental:
+
+*Spring Data JPA* enables Java developers to implement JPA-based repositories but also quickly to build applications with data access technology. Implementing the data access layer of an application has been a hassle for quite some time. To perform simple queries, pagination and auditing, you need to write boilerplate code. Spring Data JPA aims to improve the implementation of the data access layer by creating repository interfaces and custom finder methods. 
+
+== Goals of this lab
+
+The goal is to refactor *Spring JPA* application to *Quarkus Hibernate ORM with Panache* for the Data layers. After this lab, you should end up with something like:
+
+image::spring2quarkus-data-diagram.png[quarkus, 900]
+
+Let's take a look at the `OwnerRepository` class in `src/main/java/org/springframework/samples/petclinic/owner` of Spring Petclinic application. This   repository class showcases how to execute JPA queries and and save an object to the data store:
+
+[source,java]
+----
+public interface OwnerRepository extends Repository<Owner, Integer> {
+
+	/**
+	 * Retrieve {@link Owner}s from the data store by last name, returning all owners
+	 * whose last name <i>starts</i> with the given name.
+	 * @param lastName Value to search for
+	 * @return a Collection of matching {@link Owner}s (or an empty Collection if none
+	 * found)
+	 */
+	@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")
+	@Transactional(readOnly = true)
+	Collection<Owner> findByLastName(@Param("lastName") String lastName);
+
+	/**
+	 * Retrieve an {@link Owner} from the data store by id.
+	 * @param id the id to search for
+	 * @return the {@link Owner} if found
+	 */
+	@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")
+	@Transactional(readOnly = true)
+	Owner findById(@Param("id") Integer id);
+
+	/**
+	 * Save an {@link Owner} to the data store, either inserting or updating it.
+	 * @param owner the {@link Owner} to save
+	 */
+	void save(Owner owner);
+
+}
+----
+
+Here are more use cases how the presentation layer maps to the persistence layer using Spring Data JPA in Spring Petclinic application:
+
+* Vets displays all vets and their specialties
+* FindOwners is used to find owners by last name
+* FindOwnersRedirect redirects to findOwner
+* SelectOwner allows user to select from a list of multiple owners with the same last name
+* Owner displays a owner's data and a list of the owner's pets and their data
+* OwnerRedirect redirects to owner
+* Owner supports AddOwnerForm and EditOwnerForm
+* Pet supports AddPetForm and EditPetForm
+* Visit supports AddVisitForm
+
+Spring Petclinic application also supports 3 types of database such as *H2*, *HSQL*, and *MYSQL* below. In the previous lab, we used the _H2 in-memory database_ to store business data(i.e. vets, pets, owners):
+
+image::spring-db-structure.png[quarkus, 400]
+
+In this lab, we'll learn how simply refactor *Spring Data JPA* to *Quarkus Hibernate ORM with Panache*. Because _Hibernate ORM_ is the de facto JPA implementation and offers you the full breadth of an Object Relational Mapper. It makes complex mappings possible, but it does not make simple and common mappings trivial. _Hibernate ORM with Panache_ focuses on making your entities trivial and fun to write in _Quarkus_.
+
+When it comes to writing *Hibernate ORM* entities, there are a number of annoying things that users have grown used to reluctantly deal with, such as:
+
+* Duplicating ID logic: most entities need an ID, most people don’t care how it’s set, because it’s not really relevant to your model.
+* Dumb getters and setters: since Java lacks support for properties in the language, we have to create fields, then generate getters and setters for those fields, even if they don’t actually do anything more than read/write the fields.
+* Traditional EE patterns advise to split entity definition (the model) from the operations you can do on them (DAOs, Repositories), but really that requires an unnatural split between the state and its operations even though we would never do something like that for regular objects in the Object Oriented architecture, where state and methods are in the same class. Moreover, this requires two classes per entity, and requires injection of the DAO or Repository where you need to do entity operations, which breaks your edit flow and requires you to get out of the code you’re writing to set up an injection point before coming back to use it.
+* Hibernate queries are super powerful, but overly verbose for common operations, requiring you to write queries even when you don’t need all the parts.
+* Hibernate is very general-purpose, but does not make it trivial to do trivial operations that make up 90% of our model usage.
+
+With *Panache*, we took an opinionated approach to tackle all these problems:
+
+* Make your entities extend *PanacheEntity*: it has an ID field that is auto-generated. If you require a custom ID strategy, you can extend *PanacheEntityBase* instead and handle the ID yourself.
+* Use public fields. *Get rid of dumb getter and setters*. Under the hood, we will generate all getters and setters that are missing, and rewrite every access to these fields to use the accessor methods. This way you can still write useful accessors when you need them, which will be used even though your entity users still use field accesses.
+* With the active record pattern: put all your entity logic in static methods in your entity class and *don’t create DAOs*. Your entity superclass comes with lots of super useful static methods, and you can add your own in your entity class. Users can just start using your entity(i.e _Person_) by typing it and getting completion for all the operations in a single place.
+* Don’t write parts of the query that you don’t need. For exampe, write *Person.find("order by name")* or *Person.find("name = ?1 and status = ?2", "stef", Status.Alive)* or even better *Person.find("name", "stef")*.
+
+That’s all there is to it: with Panache, Hibernate ORM has never looked so trim and neat.
+
+== Setting up and configuring Hibernate ORM with Panache
+
+We'll add Quarkus extensions to the Quarkus Petclinic application for using _Panache_ that simplifies access to data via Hibernate ORM for local development. 
+
+Open a new CodeReady Workspaces Terminal and run the following commands to add the extensions:
+
+[source,console,role="copypaste"]
+----
+mvn -q quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-labs/quarkus-petclinic
+----
+
+You should see:
+
+[source,console]
+----
+✅ Extension io.quarkus:quarkus-hibernate-orm-panache has been installed
+✅ Extension io.quarkus:quarkus-jdbc-h2 has been installed
+----
+
+Quarkus supports the notion of _configuration profiles_. These allows you to have multiple configurations in the same file and select between then via a _profile name_.
+
+By default Quarkus has three profiles, although it is possible to use as many as you like. The default profiles are:
+
+* `dev` - Activated when in development mode (i.e. *quarkus:dev*)
+* `test` - Activated when running tests
+* `prod` - The default profile when not running in development or test mode
+
+Add the following variables to set the database connection details(JDBC url, database credentials) in `src/main/resources/application.properties`:
+
+[source,properties,role="copypaste"]
+----
+%dev.quarkus.datasource.url=jdbc:h2:mem:default;DB_CLOSE_DELAY=-1
+%dev.quarkus.datasource.driver=org.h2.Driver
+%dev.quarkus.datasource.username=petclinic
+%dev.quarkus.datasource.password=mysecretpassword
+%dev.quarkus.datasource.max-size=8
+%dev.quarkus.datasource.min-size=2
+%dev.quarkus.hibernate-orm.database.generation=drop-and-create
+%dev.quarkus.hibernate-orm.log.sql=false
+----
+
+== Refactor Vets Persistence Layer
+
+With our extension installed, we can now define our entity using Panache.
+
+We’ll first need to edit `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code under the `// TODO: Add Entity and Cacheable annotation` comment:
+
+[source,java,role="copypaste"]
+----
+@Entity(name="vets") // <1>
+@Cacheable // <2>
+----
+
+<1> Specify the table name(_vets_) in the database that is referred by the entity object(_Vet_).
+<2> When an entity is annotated with _@Cacheable_, all its field values are cached except for collections and relations to other entities. This means the entity can be loaded quicker without querying the database for frequently-accessed, but rarely-changing data.
+
+
+Extend `PanacheEntity` in your `Vet` entity. It should look like:
+
+[source,java]
+----
+public class Vet extends PanacheEntity {
+
+....
+
+}
+----
+
+Add the following code under the `// TODO: Add Column and NotEmpty annotation for firstName` comment:
+
+[source,java,role="copypaste"]
+----
+    @Column(name = "first_name")
+    @NotEmpty
+----
+
+Add the following code under the `// TODO: Add Column and NotEmpty annotation for lastName` comment:
+
+[source,java,role="copypaste"]
+----
+    @Column(name = "last_name")
+    @NotEmpty
+----
+
+Map a bidirectional many-to-many association as same as Spring Petclinic appliation. Add the following code under the `// TODO: Add the list of Specialty` comment:
+
+[source,java,role="copypaste"]
+----
+    @ManyToMany
+    @JoinTable(
+        name = "vet_Specialties",
+        joinColumns = @JoinColumn(name = "vet_id"),
+        inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+    public List<Specialty> specialties;
+----
+
+Remove or comment the testing code that we added in the previous lab. Because we'll access the data layer directly but nore more need to have the dumb getters and setters:
+
+[source,java]
+----
+    // public String getFirstName() {
+    //     return this.firstName;
+    // }
+    // public void setFirstName(String firstName) {
+    //     this.firstName = firstName;
+    // }
+    // public String getLastName() {
+    //     return this.lastName;
+    // }
+    // public void setLasttName(String lastName) {
+    //     this.lastName = lastName;
+    // }
+    // public static List<Vet> listAll(){
+    //     Vet vet = new Vet();
+    //     vet.setFirstName("Daniel");
+    //     vet.setLasttName("Oh");
+    //     List vets = new ArrayList<Vet>();
+    //     vets.add(vet);
+    //     return vets;
+    // }
+----
+
+Don't forget to import required packages. Add the following code under the `// TODO: Import packages` comment:
+
+[source,java,role="copypaste"]
+----
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.validation.constraints.NotEmpty;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+----
+
+Create a new entity, _Specialty_. Open an empty `Specialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.util.List;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Entity;
+import javax.persistence.ManyToMany;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+
+@Entity(name="specialties")
+@Cacheable
+public class Specialty extends PanacheEntity {
+  
+    public String name;
+
+    @ManyToMany(mappedBy = "specialties")
+    public List<Vet> vets;
+
+}
+----
+
+Edit the presentation layer to show the actual data. Open the `vets.html` in `src/main/resources/templates`, and add the following code under the `<!-- TODO: Add a for loop to list specialty -->`:
+
+[source,html,role="copypaste"]
+----
+                    {#for specialty in vet.specialties}
+                        {specialty.name} 
+                    {/for}
+----
+
+Don't forget to remove the dummy code, `none` in the HTML.
+
+Create a relation entity between _Specialty_ and _Vet_. Open an empty `VetSpecialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+
+@Entity(name="vet_specialties")
+@Cacheable
+public class VetSpecialty extends PanacheEntity {
+
+    @Column(name = "vet_id")
+    public Long vetId;
+
+    @Column(name = "specialty_id")
+	public Long specialtyId;
+    
+}
+----
+
+Let’s add vets data to the database so we can test things out. Open up the `src/main/resources/import.sql` file and copy the following SQL statements to *import.sql*:
+
+[source,sql,role="copypaste"]
+----
+INSERT INTO vets VALUES (1, 'James', 'Carter');
+INSERT INTO vets VALUES (2, 'Helen', 'Leary');
+INSERT INTO vets VALUES (3, 'Linda', 'Douglas');
+INSERT INTO vets VALUES (4, 'Rafael', 'Ortega');
+INSERT INTO vets VALUES (5, 'Henry', 'Stevens');
+INSERT INTO vets VALUES (6, 'Sharon', 'Jenkins');
+
+INSERT INTO specialties VALUES (1, 'radiology');
+INSERT INTO specialties VALUES (2, 'surgery');
+INSERT INTO specialties VALUES (3, 'dentistry');
+
+INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 2, 1);
+INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 2);
+INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 3);
+INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 4, 2);
+INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 5, 1);
+----
+
+We don't need to create schema(i.e. vets, specialties) in database as we had to do in Spring Petclinic application as below:
+
+image::spring-schema.png[spring-schema.png, 900]
+
+Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page:
+
+image::quarkus-vets-data.png[spring-schema.png, 900]
+
+Now, we’ve succeeded to refactor _Spring_ Petclinic to _Quarkus_ Clinic application:
+
+image::quarkus-spring-vets-data.png[spring-schema.png, 900]
+
+*Great job!* Let's refactor the other business layers using Hibernate ORM with Panache and CDI extensions.
+
+== Refactor Owers, Pets and Visits Persistence Layer
+
+Let's go back to the *welcome page* in Spring Petclinic application. In `FIND OWNERS` menu, we can have 3 different user expirences to search owners as below:
+
+* List all owners without search keyword
+* List more than 2 owners by searching last name(i.e. _Davis_)
+* Show detail information of one owner and related Pet, Visit by searching last name(i.e. _Franklin_)
+
+image::spring-find-owners.gif[spring-schema.png, 900]
+
+These use cases are implemented by multiple _Entity_, _Controller_, and _Repository_ classes in *src/main/java/org/springframework/samples/petclinic/owner* of Spring Petclinic application:
+
+image::spring-owners-structure.png[spring-schema.png, 400]
+
+Now, we'll refactor an *Owner* entity to implement the above use cases. Open an empty `Owner.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.util.List;
+
+import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotEmpty;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
+@Entity(name="owners")
+@Cacheable
+public class Owner extends PanacheEntityBase { // <1>
+
+    @Id // <2>
+    @SequenceGenerator(
+            name = "ownersSequence",
+            sequenceName = "owners_id_seq",
+            allocationSize = 1,
+            initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ownersSequence")
+    public Long id;
+
+    @Column(name = "first_name")
+	@NotEmpty
+	public String firstName;
+
+	@Column(name = "last_name")
+	@NotEmpty
+	public String lastName;
+    
+    public String address;
+    public String city;
+
+    @NotEmpty
+	@Digits(fraction = 0, integer = 10)
+    public String telephone;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+    public List<Pet> pets;
+    
+    public Long getId(){
+        return id;
+    }
+
+}
+----
+
+<1> Specify your own ID strategy by extending *PanacheEntityBase* instead of *PanacheEntity*. 
+<2> Declare whatever ID you want as a public field.
+
+Refactor an *Pet* entity to implement the above use cases. Open an empty `Pet.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+
+import javax.persistence.Cacheable;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
+@Entity(name="pets")
+@Cacheable
+public class Pet extends PanacheEntityBase {
+  
+	@Id
+    @SequenceGenerator(
+            name = "petsSequence",
+            sequenceName = "pets_id_seq",
+            allocationSize = 1,
+            initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "petsSequence")
+	public Long id;
+	
+	public String name;
+	
+    @Column(name = "birth_date")
+	public LocalDate birthDate;
+
+	@ManyToOne
+	@JoinColumn(name = "type_id")
+	public PetType type;
+
+	public Object getPetType() {
+		return this.type;
+	}
+
+	public void setPetType(PetType type) {
+		this.type = type;
+	}
+
+	@ManyToOne // <1>
+	@JoinColumn(name = "owner_id")
+	public Owner owner;
+
+	public Owner getOwner() {
+		return this.owner;
+	}
+
+	public void setOwner(Owner owner) {
+		this.owner = owner;
+	}
+
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "pet") // <2>
+	public List<Visit> visits;
+	
+	public Long getId(){
+        return id;
+    }
+    
+}
+----
+
+<1> *ManyToOne* annotation is associated with the _Owner_ class variable.
+<2> *OneToMany* annotation is used to define the property in _Visit_ class that will be used to map the mappedBy variable. 
+
+Refactor an *PetType* entity to implement the above use cases. Open an empty `PetType.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Entity;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+
+@Entity(name = "types")
+@Cacheable
+public class PetType extends PanacheEntity {
+  
+    public String name;
+
+    public static PetType findByName(String name) {
+        return find("name", name).firstResult();
+    }
+    
+}
+----
+
+Refactor an *Visit* entity to implement the above use cases. Open an empty `Visit.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.time.LocalDate;
+
+import javax.persistence.Cacheable;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotEmpty;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
+
+@Entity(name="visits")
+@Cacheable
+public class Visit extends PanacheEntity {
+  
+	@ManyToOne
+	@JoinColumn(name = "pet_id")
+	public Pet pet;
+
+    @Column(name = "visit_date")
+	public LocalDate date;
+
+	@NotEmpty
+	public String description;
+
+	public Pet getPet() {
+		return this.pet;
+	}
+
+	public void setPet(Pet pet) {
+		this.pet = pet;
+	}
+	
+}
+----
+
+Create a CDI bean to retrieve the _Owner_ object. Open an empty `OwnersService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.service;
+
+import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
+import org.acme.model.Owner;
+import io.quarkus.panache.common.Sort;
+
+@ApplicationScoped
+public class OwnersService {
+
+    public List<Owner> findByLastName(String lastName) {
+        if (lastName != null && !lastName.isEmpty()) {
+            return Owner.find("LOWER(lastName) LIKE LOWER(?1) ", 
+                Sort.by("firstName"), "%" + lastName + "%").list();
+        } else {
+            return Owner.listAll(); 
+        }
+    }
+
+    public Owner findById(Long id) { 
+        return Owner.findById(id.longValue());
+    }
+
+}
+----
+
+<1> Simplify your query conditions such as *Like* and *Sort*.
+<2> Static method to list all data by default so you don't need to implement a full query like _@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")_ in Spring Petclinic application.
+<3> Static method to search by ID by default so you don't need to implement a full query like _@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")_ in Spring Petclinic application.
+
+Edit the `OwnersResource.java` class to inject the OwnersService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
+
+[source,java,role="copypaste"]
+----
+    @Inject
+    OwnersService service;
+----
+
+Inject a new template(editOwner) to render the Owner detail information. Add the following code under the `// TODO: Inject editOwner template` comment:
+
+[source,java,role="copypaste"]
+----
+    @Inject
+    Template editOwner;
+----
+
+Update the `OwnersResource.java` class to invoke *findById(id)* service. `Replace` the entire following `findOwners` method with the following code:
+
+[source,java,role="copypaste"]
+----
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("owners")
+    public TemplateInstance findOwners(@QueryParam("id") Long id) {
+        return owners.data("active", "owners")
+                    .data("owners", ((id == null) ? id : Arrays.asList(service.findById(id))));
+    }
+----
+
+Add the following code under the `// TODO: Add to search an exiting owner by last name` comment:
+
+[source,java,role="copypaste"]
+----
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("find")
+    public TemplateInstance findByLastName(@QueryParam("lastName") String lastName) {
+        return owners.data("active", "owners")
+                    .data("lastName", lastName)
+                    .data("owners", service.findByLastName(lastName));
+
+    }
+----
+
+Add the following code under the `// TODO: Add to retrieve an exiting owner` comment:
+
+[source,java,role="copypaste"]
+----
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("getOwner")
+    public TemplateInstance editOwner(@QueryParam("ownerId") Long ownerId) {
+        
+        return editOwner.data("active", "owners")
+                        .data("owner", ((ownerId == null) ? "new" : service.findById(ownerId)));
+    }
+----
+
+Also, don’t forget to add the import statement by un-commenting the import statement for *OwnersResource* near the top:
+
+[source,java]
+----
+import org.acme.service.OwnersService;
+----
+
+Next, we'll refactor the presentation layer to show listAll, findByLastName, and detail view. Open an empty `ownersList.html` in `src/main/resources/templates`, and add the following code:
+
+[source,html,role="copypaste"]
+----
+<h2>Owners</h2>
+
+<table id="owners" class="table table-striped">
+    <thead>
+    <tr>
+        <th style="width: 150px;">Name</th>
+        <th style="width: 200px;">Address</th>
+        <th>City</th>
+        <th style="width: 120px">Telephone</th>
+        <th>Pets</th>
+    </tr>
+    </thead>
+    <tbody>
+        {#for owner in owners} 
+            <tr>
+                <td>
+                    <a href="/owners?id={owner.id}">{owner.firstName} {owner.lastName}</a>
+                </td>
+                <td>{owner.address}</td>
+                <td>{owner.city}</td>
+                <td>{owner.telephone}</td>
+                <td>{#for pet in owner.pets}{pet.name} {/for}</td>
+            </tr>
+        {/for}
+    </tbody>
+</table>
+----
+
+Open an empty `ownerDetails.html` in `src/main/resources/templates`, and add the following code:
+
+[source,html,role="copypaste"]
+----
+<h2>Owner Information</h2>
+
+<table class="table table-striped">
+    <tr>
+      <th>Name</th>
+      <td><b>{owners.get(0).firstName} {owners.get(0).lastName}</b></td>
+    </tr>
+    <tr>
+      <th>Address</th>
+      <td>{owners.get(0).address}</td>
+    </tr>
+    <tr>
+      <th>City</th>
+      <td>{owners.get(0).city}</td>
+    </tr>
+    <tr>
+      <th>Telephone</th>
+      <td>{owners.get(0).telephone}</td>
+    </tr>
+</table>
+
+<a href="getOwner?ownerId={owners.get(0).id}" class="btn btn-default">Edit Owner</a>
+<a href="getPet?ownerId={owners.get(0).id}" class="btn btn-default">Add New Pet</a>
+
+<br />
+<br />
+<br />
+
+<h2>Pets and Visits</h2>
+
+<table class="table table-striped">
+    {#for pet in owners.get(0).pets} 
+      <tr>
+        <td valign="top">
+          <dl class="dl-horizontal">
+            <dt>Name</dt>
+            <dd>{pet.name}</dd>
+            <dt>Birth Date</dt>
+            <dd>{pet.birthDate}</dd>
+            <dt>Type</dt>
+            <dd>{pet.type.name}</dd>
+          </dl>
+        </td>
+        <td valign="top">
+          <table class="table-condensed">
+            <thead>
+              <tr>
+                <th>Visit Date</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            {#if pet.visits != null}
+              {#for visit in pet.visits} 
+                <tr>
+                  <td>{visit.date}</td>
+                  <td>{visit.description}</td>
+                </tr>
+              {/for}
+            {/if}
+            <tr>
+              <td><a href="/getPet?ownerId={owners.get(0).id}&petId={pet.id}">Edit Pet</a></td>
+              <td><a href="/getVisit?ownerId={owners.get(0).id}&petId={pet.id}">Add Visit</a></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {/for}
+</table>
+----
+
+Let’s add _owners, pets, visits, types_ data to the database so we can test things out. Open up the `src/main/resources/import.sql` file and `append` the following SQL statements to existing *import.sql*:
+
+[source,sql,role="copypaste"]
+----
+INSERT INTO types VALUES (1, 'cat');
+INSERT INTO types VALUES (2, 'dog');
+INSERT INTO types VALUES (3, 'lizard');
+INSERT INTO types VALUES (4, 'snake');
+INSERT INTO types VALUES (5, 'bird');
+INSERT INTO types VALUES (6, 'hamster');
+
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'George', 'Franklin', '110 W. Liberty St.', 'Madison', '6085551023');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Betty', 'Davis', '638 Cardinal Ave.', 'Sun Prairie', '6085551749');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Eduardo', 'Rodriquez', '2693 Commerce St.', 'McFarland', '6085558763');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Harold', 'Davis', '563 Friendly St.', 'Windsor', '6085553198');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Peter', 'McTavish', '2387 S. Fair Way', 'Madison', '6085552765');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Jean', 'Coleman', '105 N. Lake St.', 'Monona', '6085552654');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Jeff', 'Black', '1450 Oak Blvd.', 'Monona', '6085555387');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Maria', 'Escobito', '345 Maple St.', 'Madison', '6085557683');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'David', 'Schroeder', '2749 Blackhawk Trail', 'Madison', '6085559435');
+INSERT INTO owners (id, first_name, last_name, address, city, telephone) VALUES (nextval('owners_id_seq'), 'Carlos', 'Estaban', '2335 Independence La.', 'Waunakee', '6085555487');
+
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Leo', '2010-09-07', 1, 1);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Basil', '2012-08-06', 6, 2);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Rosy', '2011-04-17', 2, 3);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Jewel', '2010-03-07', 2, 3);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Iggy', '2010-11-30', 3, 4);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'George', '2010-01-20', 4, 5);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Samantha', '2012-09-04', 1, 6);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Max', '2012-09-04', 1, 6);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Lucky', '2011-08-06', 5, 7);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Mulligan', '2007-02-24', 2, 8);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Freddy', '2010-03-09', 5, 9);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Lucky', '2010-06-24', 2, 10);
+INSERT INTO pets (id, name, birth_date, type_id, owner_id) VALUES (nextval('pets_id_seq'), 'Sly', '2012-06-08', 1, 10);
+
+INSERT INTO visits (id, pet_id, visit_date, description) VALUES (1, 7, '2013-01-01', 'rabies shot');
+INSERT INTO visits (id, pet_id, visit_date, description) VALUES (2, 8, '2013-01-02', 'rabies shot');
+INSERT INTO visits (id, pet_id, visit_date, description) VALUES (3, 8, '2013-01-03', 'neutered');
+INSERT INTO visits (id, pet_id, visit_date, description) VALUES (4, 7, '2013-01-04', 'spayed');
+----
+
+Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Find Owner` button without typing the last name in:
+
+image::quarkus-petclinic-listall.png[spring-schema.png, 900]
+
+You should see the following *all owners* as same as you saw in the Spring Petclinic application:
+
+image::quarkus-petclinic-listall-result.png[spring-schema.png, 900]
+
+Let's try to search by the last name. Go back to the previous page or click on the `FIND OWNERS` menu. Type `Davis` in the last name input box:
+
+image::quarkus-petclinic-findByLastname.png[spring-schema.png, 900]
+
+You should see *2 owners* as same as you saw in the Spring Petclinic application:
+
+image::quarkus-petclinic-findByLastname-result.png[spring-schema.png, 900]
+
+Search by the last name once again. Go back to the previous page or click on the `FIND OWNERS` menu. Type `Franklin` in the last name input box:
+
+image::quarkus-petclinic-findByLastname2.png[spring-schema.png, 900]
+
+You should see the *owner's detail* page as same as you saw in the Spring Petclinic application:
+
+image::quarkus-petclinic-findByLastname-result2.png[spring-schema.png, 900]
+
+== Refactor More Use Cases(Edit & Add)
+
+Spring Petclinic application allows us to have more Java Persistence API(JPA) Clinic Implementation for CRUD capabilities:
+
+* _Add_ a new owner and _Edit_ an existing owner
+* _Add_ a new pet and _Edit_ an existing pet
+* _Add_ a new visit
+
+image::spring-more-crud.png[spring.png, 900]
+
+Edit the `OwnersResource.java` class to refactor the owner persistence layer. Add the following code under the `// TODO: Add to Post transaction for adding a new owner` comment:
+
+[source,java,role="copypaste"]
+----
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA) // <1>
+    @Transactional // <2>
+    @Path("addOwner")
+    public Response addOwner(@MultipartForm OwnerForm ownerForm) { // <3>
+
+        Owner newOwner = ownerForm.addOwner();
+        newOwner.persist(); // <4>
+        return Response.status(301)
+                    .location(URI.create("/owners?id=" + newOwner.getId()))
+                    .build();
+    }
+----
+
+<1> @Consumes annotation defines the expected content-type consumed by this request(parameters).
+<2> @Transactional annotation will make the method a transaction boundary.
+<3> @MultipartForm defines the parameter as a value object for incoming/outgoing request/responses of the multipart/form-data mime type.
+<4> Make sure to wrap methods modifying your database (e.g. newOwner.persist()) within a transaction.
+
+Add the following code under the `// TODO: Add to Post transaction for editing an exiting owner` comment:
+
+[source,java,role="copypaste"]
+----
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    @Path("editOwner")
+    public Response editOwner(@MultipartForm OwnerForm ownerForm, @QueryParam("ownerId") Long ownerId) {
+
+        Owner existingOwner = service.findById(ownerId);
+        existingOwner = ownerForm.editOwner(existingOwner);
+        return Response.status(301)
+                    .location(URI.create("/owners?id=" + ownerId))
+                    .build();
+    }
+----
+
+Also, don’t forget to add the import statement by un-commenting the import statement for *OwnersResource* near the top:
+
+[source,java]
+----
+import org.acme.model.Owner;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.acme.model.OwnerForm;
+----
+
+RESTEasy has rich support for the _multipart/_ and _multipart/form-data_ mime types. The multipart mime format is used to pass lists of content bodies. Multiple content bodies are embedded in one message. We'll also use this `multipart/form-data` in the Quarkus Petclinic application. *@FormParam* allows you to inject individual form parameters from the request body into method parameter values.
+
+Open an empty `OwnerForm.java` class file in `src/main/java/org/acme/model`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import javax.ws.rs.FormParam;
+
+public class OwnerForm {
+
+    public @FormParam("firstName") String firstName;
+    public @FormParam("lastName") String lastName;
+    public @FormParam("address") String address;
+    public @FormParam("city") String city;
+    public @FormParam("telephone") String telephone;
+
+    public Owner addOwner() {
+        Owner newOwner = new Owner();
+        newOwner.firstName = firstName;
+        newOwner.lastName = lastName;
+        newOwner.address = address;
+        newOwner.city = city;
+        newOwner.telephone = telephone;
+        return newOwner;
+    }
+
+    public Owner editOwner(Owner existingOwner) {
+        existingOwner.firstName = firstName;
+        existingOwner.lastName = lastName;
+        existingOwner.address = address;
+        existingOwner.city = city;
+        existingOwner.telephone = telephone;
+        return existingOwner;
+    }
+    
+}
+----
+
+Next, we'll refactor the presentation layer to edit or add an owner. Open an empty `editOwner.html` in `src/main/resources/templates`, and add the following code:
+
+[source,html,role="copypaste"]
+----
+{#include header/}
+
+<h2>Owner</h2>
+
+<form class="form-horizontal" id="add-owner-form" method="post" action="{#if owner.id is null}addOwner{#else}editOwner?ownerId={owner.id}{/if}" enctype="multipart/form-data"> // <1>
+<div class="form-group has-feedback">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">First Name</label>
+        <div class="col-sm-10">
+            <div>
+                <input class="form-control" type="text" id="firstName" name="firstName" value="{owner.firstName ?: ''}" />
+            </div>
+          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Last Name</label>
+        <div class="col-sm-10">
+            <div>
+                <input class="form-control" type="text" id="lastName" name="lastName" value="{owner.lastName ?: ''}" />
+            </div>
+          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+          
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Address</label>
+        <div class="col-sm-10">
+            <div>
+                <input class="form-control" type="text" id="address" name="address" value="{owner.address ?: ''}" />
+            </div>
+          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+          
+        </div>
+    </div>
+      
+    <div class="form-group">
+        <label class="col-sm-2 control-label">City</label>
+        <div class="col-sm-10">
+            <div>
+                <input class="form-control" type="text" id="city" name="city" value="{owner.city ?: ''}" />
+            </div>
+          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+        </div>
+    </div>
+      
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Telephone</label>
+        <div class="col-sm-10">
+            <div>
+                <input class="form-control" type="text" id="telephone" name="telephone" value="{owner.telephone ?: ''}" />
+            </div>
+          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+        </div>
+    </div>
+
+</div>
+<div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+        <button class="btn btn-default" type="submit">{#if owner == 'new'}Add{#else}Update{/if} Owner</button>
+    </div>
+</div>
+</form>
+
+{#include footer/}
+----
+
+<1> Use multipart/form-data mime types to pass lists of content bodies. 
+
+Lastly, we need to use the `update` policy for only updating the schema in the database. Open an `application.properties` in `src/main/resources/` then replace the following configuration:
+
+[source,properties,role="copypaste"]
+----
+%dev.quarkus.hibernate-orm.database.generation=update
+----
+
+Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Add Owner`:
+
+image::quarkus-new-owner.png[quarkus-petclinic.png, 900]
+
+Input the new owner's information as below:
+
+* First Name: `Daniel`
+* Last Name: `Oh`
+* Address: `100 E Davie St`
+* City: `Raleigh`
+* Telephone: `1112223333`
+
+image::quarkus-new-owner-info.png[quarkus-petclinic.png, 900]
+
+Click on `Add Owner`. You should see the following owner information:
+
+image::quarkus-new-owner-info2.png[quarkus-petclinic.png, 900]
+
+Let's try to edit the owner infomation. Click on `Edit Owner`. Replace the first name and last name as below:
+
+* First Name: `James`
+* Last Name: `Falkner`
+
+image::quarkus-edit-owner.png[quarkus-petclinic.png, 900]
+
+Click on `Update Owner`. You should see the following owner information:
+
+image::quarkus-edit-owner-info.png[quarkus-petclinic.png, 900]
+
+When you click on `Find Owner` without *Last Name* in the FIND OWNERS menu, you shoud see the new owner(i.e. _James Falkner_) in the list:
+
+image::quarkus-new-owner-list.png[quarkus-petclinic.png, 900]
+
+Good job! We'll now refactor the Pet and Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Pet object. Open an empty `PetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.service;
+
+import javax.enterprise.context.ApplicationScoped;
+import org.acme.model.Pet;
+
+@ApplicationScoped
+public class PetsService {
+   
+    public Pet findById(Long id) {
+        return Pet.findById(id.longValue());
+    }
+
+}
+----
+
+Open an empty `PetsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.rest;
+
+import java.net.URI;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+
+import io.quarkus.qute.Template;
+import io.quarkus.qute.TemplateInstance;
+
+import org.acme.model.Pet;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+
+import org.acme.service.OwnersService;
+import org.acme.model.PetForm;
+import org.acme.model.PetType;
+import org.acme.service.PetsService;
+import org.jboss.resteasy.annotations.jaxrs.QueryParam;
+
+@Path("/")
+public class PetsResource {
+
+    @Inject // <1>
+    OwnersService ownerService;
+
+    @Inject // <2>
+    PetsService petService;
+
+    @Inject // <3>
+    Template pet;
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("getPet") // <4>
+    public TemplateInstance getPet(@QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
+        return pet.data("active", "owners")
+                    .data("owner", ownerService.findById(ownerId))
+                    .data("pet", (petId != null ? petService.findById(petId) : petId));
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    @Path("addPet") // <5>
+    public Response addPet(@MultipartForm PetForm petForm, @QueryParam("ownerId") Long ownerId) {
+
+        Pet newPet = petForm.addPet();
+        newPet.setOwner(ownerService.findById(ownerId));
+        newPet.setPetType(PetType.findByName(petForm.type));
+        newPet.persist();
+        return Response.status(301)
+                    .location(URI.create("/owners?id=" + ownerId))
+                    .build();
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    @Path("editPet") // <6>
+    public Response editOwner(@MultipartForm PetForm petForm, @QueryParam("ownerId") Long ownerId, @QueryParam("petId")Long petId) {
+
+        Pet existingPet = petService.findById(petId);
+        existingPet = petForm.editPet(existingPet);
+        existingPet.setOwner(ownerService.findById(ownerId));
+        existingPet.setPetType(PetType.findByName(petForm.type));
+        return Response.status(301)
+            .location(URI.create("/owners?id=" + ownerId))
+            .build();
+    }
+
+}
+----
+
+<1> Inject OwnersService CDI bean to find a related owner
+<2> Inject PetsService CDI bean to find an existing pet by ID
+<3> Inject a Qute Template 
+<4> Retrieve the exiting Pet information related to a certain owner
+<5> Add a new Pet information
+<6> Edit an exiting Pet information
+
+Open an empty `PetForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.time.LocalDate;
+import javax.ws.rs.FormParam;
+
+public class PetForm {
+
+    public @FormParam("name") String name;
+    public @FormParam("birthDate") LocalDate birthDate;
+    public @FormParam("type") String type;
+
+    public Pet addPet() {
+        Pet newPet = new Pet();
+        newPet.name = name;
+        newPet.birthDate = birthDate;
+        return newPet;
+    }
+
+    public Pet editPet(Pet existingPet) {
+        existingPet.name = name;
+        existingPet.birthDate = birthDate;
+        return existingPet;
+    }
+    
+}
+----
+
+[NOTE]
+====
+Pet presentation layer are already refactored using Quarkus Qute templates. Find more details in _src/main/resources/templates/pet.html_.
+====
+
+Go back to the _Quarkus Petclinic_ page in your browser, navigate an existing owner(`Jean Coleman`) infomation page:
+
+image::quarkus-jean-detail.png[quarkus-petclinic.png, 900]
+
+Click on `Add new Pet` and input the following information:
+
+* Name: `Cooper`
+* Birth Date: `2020-01-01`
+* Type: `dog`
+
+Click on `Add Pet`
+
+image::quarkus-new-pet-detail.png[quarkus-petclinic.png, 900]
+
+You should see the new pet(i.e. `Cooper`) in the list:
+
+image::quarkus-new-pet-result.png[quarkus-petclinic.png, 900]
+
+Let's try to edit an existing pet's information. Click on `Edit Pet` in `Samantha` then update the following information:
+
+* Name: `Kitty`
+* Birth Date: `2020-09-04`
+
+image::quarkus-edit-pet.png[quarkus-petclinic.png, 900]
+
+Click on `Update Pet` then youu should see the updated pet(i.e. `Kitty`) in the list:
+
+image::quarkus-edit-pet-result.png[quarkus-petclinic.png, 900]
+
+Lastly, We'll refactor the Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Visit object. Open an empty `VisitsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.service;
+
+import javax.enterprise.context.ApplicationScoped;
+import org.acme.model.Pet;
+
+@ApplicationScoped
+public class VisitsService {
+
+    public Pet findById(Long id) {
+        return Pet.findById(id.longValue());
+    }
+
+}
+----
+
+Open an empty `VisitsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.rest;
+
+import java.net.URI;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.POST;
+import javax.ws.rs.Produces;
+
+import io.quarkus.qute.Template;
+import io.quarkus.qute.TemplateInstance;
+
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+
+import org.acme.service.OwnersService;
+import org.acme.model.VisitForm;
+import org.acme.model.Visit;
+import org.acme.service.PetsService;
+import org.jboss.resteasy.annotations.jaxrs.QueryParam;
+
+@Path("/")
+public class VisitsResource {
+
+    @Inject
+    OwnersService ownerService;
+
+    @Inject
+    PetsService petService;
+
+    @Inject
+    Template visit;
+
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    @Path("getVisit")
+    public TemplateInstance getPet(@QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
+        return visit.data("active", "owners")
+                    .data("owner", ownerService.findById(ownerId))
+                    .data("pet", petService.findById(petId));
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Transactional
+    @Path("addVisit")
+    public Response addPet(@MultipartForm VisitForm visitForm, @QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
+
+        Visit newVisit = visitForm.addVisit();
+        newVisit.setPet(petService.findById(petId));
+        newVisit.persist();
+        return Response.status(301)
+                    .location(URI.create("/owners?id=" + ownerId))
+                    .build();
+    }
+
+}
+----
+
+Open an empty `VisitForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
+
+[source,java,role="copypaste"]
+----
+package org.acme.model;
+
+import java.time.LocalDate;
+import javax.ws.rs.FormParam;
+
+public class VisitForm {
+
+    public @FormParam("date") LocalDate date;
+    public @FormParam("description") String description;
+
+    public Visit addVisit() {
+        Visit newVisit = new Visit();
+        newVisit.date = date;
+        newVisit.description = description;
+        return newVisit;
+    }
+
+}
+----
+
+[NOTE]
+====
+Visit presentation layer are already refactored using Quarkus Qute templates. Find more details in _src/main/resources/templates/visit.html_.
+====
+
+Go back to the previous owner(i.e. `Jean Coleman`) information page in your browser, click on `Add Visit` for *Cooper*:
+
+image::quarkus-add-visit.png[quarkus-petclinic.png, 900]
+
+Input the follwing visit information to make a reservation to see the Vet:
+
+* Date: `2020-12-12`
+* Description: `cold`
+
+image::quarkus-add-visit-detail.png[quarkus-petclinic.png, 900]
+
+Click on `Add Visit` then you should see the new visit inforamtion of `Cooper` in the list:
+
+image::quarkus-add-visit-result.png[quarkus-petclinic.png, 900]
+
+== Congratulations!
+
+You've learned how to simply refactor *Spring Data JPA* to *Quarkus Hibernate ORM with Panache* and *Quarkus CDI*. Because Hibernate ORM is the de facto JPA implementation and offers you the full breadth of an Object Relational Mapper. It makes complex mappings possible, but it does not make simple and common mappings trivial. Hibernate ORM with Panache focuses on making your entities trivial and fun to write in Quarkus.

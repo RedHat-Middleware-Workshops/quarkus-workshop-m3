@@ -1,0 +1,141 @@
+= Getting Started with Spring Petclinic
+:experimental:
+
+https://github.com/spring-projects/spring-framework[Spring^] is one of the most widely used Java frameworks for building applications. For the Java platform, The Spring Framework provides a comprehensive programming and configuration model for modern Java-based enterprise applications with dependency injection, events, resources, data transactions, web applications based on MVC(Model-view-controller) pattern, and more. It basically aims to simplify enterprise application development for Java developers. 
+
+While the Spring framework focuses more on providing enterprise features to developers, https://github.com/spring-projects/spring-boot[Spring Boot^] aims to shorten the code length and provide Spring developers an easier way to develop standalone microservices with an embedded runtime(i.e. Tomcat, Jetty, or Undertow), opinionated starter dependencies, externalized configuration, and more. However, it's *not* the most suitable framework when it comes to writing cloud-native microservices, designing serverless applications for event-driven architecture that are deployed to cloud infrastructure such as https://www.redhat.com/en/topics/containers/what-is-kubernetes[Kubernetes^], https://www.redhat.com/en/technologies/cloud-computing/openshift[Red Hat OpenShift Container Platform^], and take advantage of the underlying platform to do amazing things. In this workshop, we will walk you through how *Spring developers* are able to refactor *Spring* applications to Kubernetes-native microservices with *Quarkus* for dealing with these challenges. 
+
+== What is Spring PetClinic Project?
+
+https://github.com/spring-projects/spring-petclinic[Spring PetClinic^] is the most popular sample application that demonstrates all the common features of traditional enterprise Java application using a Spring Boot with Spring MVC and Spring Data. The PetClinic showcases how the users who work in the clinic manage their work in terms of view and manage information regarding the veterinarians, the clients, and their pets with the following use case:
+
+ * View a list of veterinarians and their specialties
+ * View information pertaining to a pet owner
+ * Update the information pertaining to a pet owner
+ * Add a new pet owner to the system
+ * View information pertaining to a pet
+ * Update the information pertaining to a pet
+ * Add a new pet to the system
+ * View information pertaining to a pet's visitation history
+ * Add information pertaining to a visit to the pet's visitation history
+
+The conceptual software layers of the Spring Petclinic application look like:
+
+image::spring-petclinic-diagram.png[spring, 700]
+
+== Getting Ready for the labs
+
+[NOTE]
+====
+If you’ve already completed other labs today then you'll be familiar with the CodeReady environment and can skip down to the *Import Project* section.
+====
+
+=== If this is the first module you are doing today
+
+You will be using Red Hat CodeReady Workspaces, an online IDE based on https://www.eclipse.org/che/[Eclipe Che^]. *Changes to files are auto-saved every few seconds*, so you don’t need to explicitly save changes.
+
+To get started, {{ CHE_URL }}[access the CodeReady Workspaces instance^] and log in using the username and password you’ve been assigned (e.g. `{{ USER_ID }}/{{ CHE_USER_PASSWORD }}`):
+
+image::che-login.png[cdw, 700]
+
+Once you log in, you’ll be placed on your personal dashboard. Click on the name of the pre-created workspace on the left, as shown below (the name will be different depending on your assigned number). You can also click on the name of the workspace in the center, and then click on the green *{{ USER_ID}}-namespace* that says _Open_ on the top right hand side of the screen.
+
+image::che-landing-spring.png[cdw, 700]
+
+After a minute or two, you’ll be placed in the workspace:
+
+image::che-workspace.png[cdw, 900]
+
+This IDE is based on Eclipse Che (which is in turn based on MicroSoft VS Code editor).
+
+You can see icons on the left for navigating between project explorer, search, version control (e.g. Git), debugging, and other plugins.  You’ll use these during the course of this workshop. Feel free to click on them and see what they do:
+
+image::crw-icons.png[cdw, 400]
+
+[NOTE]
+====
+If things get weird or your browser appears, you can simply reload the browser tab to refresh the view.
+====
+
+Many features of CodeReady Workspaces are accessed via *Commands*. You can see a few of the commands listed with links on the home page (e.g. _New File.._, _Git Clone.._, and others).
+
+If you ever need to run commands that you don't see in a menu, you can press kbd:[F1] to open the command window, or the more traditional kbd:[Control+SHIFT+P] (or kbd:[Command+SHIFT+P] on Mac OS X).
+
+== Import Project
+
+Let's import our first project. Click on *Git Clone..* (or type kbd:[F1], enter 'git' and click on the auto-completed _Git Clone.._ )
+
+image::che-workspace-gitclone.png[cdw, 900]
+
+Step through the prompts, using the following value for **Repository URL**. If you use *FireFox*, it may end up pasting extra spaces at the end, so just press backspace after pasting:
+
+[source,none,role="copypaste"]
+----
+https://github.com/RedHat-Middleware-Workshops/quarkus-workshop-labs
+----
+
+image::crw-clone-repo.png[crw,900]
+
+The Terminal window in CodeReady Workspaces. You can open a terminal window for any of the containers running in your Developer workspace. For the rest of these labs, anytime you need to run a command in a terminal, you can use the **>_ New Terminal** command on the right:
+
+image::cmd-terminal.png[codeready-workspace-terminal, 700]
+
+== IMPORTANT: Check out proper Git branch
+
+To make sure you're using the right version of the project files, run this command in a CodeReady Terminal:
+
+[source,sh,role="copypaste"]
+----
+cd $CHE_PROJECTS_ROOT/quarkus-workshop-labs && git checkout rhtr2020
+----
+
+The project is imported into your workspace and is visible in the project explorer:
+
+image::crw-clone-explorer-spring.png[crw,900]
+
+== Running the Spring Petclinic
+
+Let's run the Spring Petclinic application. in a CodeReady Terminal:
+
+[source,sh,role="copypaste"]
+----
+mvn spring-boot:run -f $CHE_PROJECTS_ROOT/quarkus-workshop-labs/spring-petclinic
+----
+
+[NOTE]
+====
+The first time you build the app, new dependencies may be downloaded via maven. This should only happen once, after that things will go even faster.
+====
+
+You should see:
+
+[source,none]
+----
+INFO 326 --- [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8081 (http) with context path ''
+INFO 326 --- [  restartedMain] DeferredRepositoryInitializationListener : Triggering deferred initialization of Spring Data repositories…
+INFO 326 --- [  restartedMain] DeferredRepositoryInitializationListener : Spring Data repositories initialized!
+INFO 326 --- [  restartedMain] o.s.s.petclinic.PetClinicApplication     : Started PetClinicApplication in 3.918 seconds (JVM running for 4.28)
+INFO 326 --- [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+INFO 326 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+INFO 326 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+----
+
+The Spring Boot application should be running with _8081_ port because you will initialize _8080_ port to run a Quarkus application later.
+
+CodeReady will also detect that the Quarkus app opens port `8081` for web requests. When prompted, *open the port `8081`*, which opens a small web browser in CodeReady:
+
+image::open-port-spring.png[port, 700]
+
+Then click on `Open Link` to redirect to the external URL of the Spring Boot application:
+
+image::open-link-spring.png[port, 700]
+
+You should see the Spring Petclinic welcome page (you may need to click the _reload_ icon):
+
+image::welcome-spring-petclinic.png[port, 900]
+
+Click on the URL link at the upper right to open the same default page in a separate browser tab:
+
+image::crw-open-spring-page.png[page, 800]
+
+`Leave this page` because you will go through logical views and implemented the use cases of Spring Petclinic application in the next labs.

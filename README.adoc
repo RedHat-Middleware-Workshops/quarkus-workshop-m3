@@ -1,0 +1,9 @@
+= Quarkus Workshop Guide
+
+This workshop focuses on https://quarkus.io[Quarkus], supersonic, subatomic container-native Java. The workshop uses https://eclipse.org/che[Eclipse Che] to develop Quarkus apps and deploy them to a Kubernetes cluster (based on OpenShift), and covers several other developer topics such as:
+
+* Getting Started with Spring Petclinic
+* Spring Web to Quarkus Qute
+* Spring DI to Quarkus CDI
+* Spring Data JPA to Quarkus Hibernate ORM with Panache
+* Spring Cloud to Quarkus on OpenShift
