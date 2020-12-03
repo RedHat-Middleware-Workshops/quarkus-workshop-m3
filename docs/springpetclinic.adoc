@@ -61,7 +61,7 @@ Many features of CodeReady Workspaces are accessed via *Commands*. You can see a
 
 If you ever need to run commands that you don't see in a menu, you can press kbd:[F1] to open the command window, or the more traditional kbd:[Control+SHIFT+P] (or kbd:[Command+SHIFT+P] on Mac OS X).
 
-== Import Project
+## Import Project
 
 Let's import our first project. Click on *Git Clone..* (or type kbd:[F1], enter 'git' and click on the auto-completed _Git Clone.._ )
 
@@ -76,11 +76,23 @@ https://github.com/RedHat-Middleware-Workshops/quarkus-workshop-m3-labs
 
 image::crw-clone-repo.png[crw,900]
 
-The Terminal window in CodeReady Workspaces. You can open a terminal window for any of the containers running in your Developer workspace. For the rest of these labs, anytime you need to run a command in a terminal, you can use the **>_ New Terminal** command on the right:
+Click on *Select Repository Location* then click on *Open in New Window*. It will reload your web browser immediately:
 
-image::cmd-terminal.png[codeready-workspace-terminal, 700]
+image::crw-add-workspace.png[crw, 900]
 
-== IMPORTANT: Check out proper Git branch
+The project is imported into your workspace and is visible in the project explorer (click on the top-most icon for project explorer):
+
+image::crw-clone-explorer.png[crw,900]
+
+[NOTE]
+====
+The Terminal window in CodeReady Workspaces. You can open a terminal window for any of the containers running in your Developer workspace. For the rest of these labs, anytime you need to run a command in a
+terminal, you can use the **>_ New Terminal** command on the right:
+
+image::cmd-terminal.png[codeready-workspace-terminal, 900]
+====
+
+==== IMPORTANT: Check out proper Git branch
 
 To make sure you're using the right version of the project files, run this command in a CodeReady Terminal:
 
