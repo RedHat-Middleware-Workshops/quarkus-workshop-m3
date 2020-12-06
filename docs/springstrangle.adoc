@@ -1,68 +1,39 @@
 = Strangling the Spring Monolith with Quarkus
+:experimental:
 
-In this section of the lab, you will strangle the monolith with Quarkus. 
+In the previous, labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack, and you got a glimpse into the efficiency of Quarkus for Spring developers.
 
-Currently the Pet Clinic application is developed as a monolith. All of the application functionality is in a single app. This fine for the initial version. However, we will migrate this to a microservices architecture. Here is a high-level architecture diagram of the application.
+You will now begin the process of https://martinfowler.com/bliki/StranglerFigApplication.html[strangling the monolith^] by breaking the application into multiple microservices based on different functionalities, with the eventual goal of re-architecting the entire application as a set of distributed microservices. Later on, we’ll explore how you can better manage the application in a cloud-native way after it is re-architected.
 
-image::microservices/monolith-architecture.png[]
+== Goals of this lab
 
-Let's refactor the application architecture to leverage microservices. The service related modules are replaced by microservices. Also, each microservice has a database that only contains information for its related entity. Based on this approach, we have three microservices as shown in the diagram below. Each microservice has its own database.
+The goal is to *strangle* monolith with *Quarkus* and deploy them to *OpenShift*. After this lab, you should end up with something like:
 
-image::microservices/microservices-architecture.png[]
+image::spring2quarkus-strangle-diagram.png[quarkus, 700]
 
-The `vets-service` manages the data for vets. The service exposes a method for retrieving a list of vets and their associated specialites.
+* *Vets Service* manages the data for retrieving a list of vets and their associated specialites.
+* *Visits Service* manages the data to perform CRUD operations for pet visits.
+* *Customers Service* manages the data for owners and pets. It is a composition of the original modules for owners and pets because it would be easier to handle the database tight-relationships between owners and pets.
 
-The `visits-service` manages the data for pet visits. This service exposes methods to perform CRUD operations for pet visits.
+== Create New Vets Microserivces
 
-The `customers-service` manages the data for owners and pets. It is a composition of the original modules for owners and pets. This service is a composition since there is a tight-relationship between owners and pets. This approach makes it easy to handle the database relationships.
+Let's break the vets module into a single microservice with a separated lightweight database that only contains information for its related entity. Based on this approach, a new vets service has the following architecture:
 
-In the essense of time, you will only develop one of the microservice in this lab. You will develop the `vets-service`. We will provide the remaining microservices for you (`visits-service` and `customers-service`).
+image::microservices/vets-service-architecture.png[quarkus, 600]
 
-You will also update the petclinic web application to leverage the new `vets-service`.
+In the project explorer, expand the *quarkus-petclinic-vets-service* project.
 
-== vets-service
+image::new-vets-prj-structure.png[quarkus, 600]
 
-In this section, you will develop the `vets-service`. 
+To leverage a new service by the existing Quarkus petclinic application, the vets service exposes the following endpoint:
 
-The vets-service exposes the following endpoint:
 [cols="1,1,3", options="header"]
 |===
 | HTTP Method | Endpoint | Description
 | GET | /vets | Retrieves a list of vets and their associated specialties
 |===
 
-The `vets-service` has the following architecture:
-
-image::microservices/vets-service-architecture.png[width="300"]
-
-You will first develop the service and then refactor the web application to use the service.
-
-=== Review code for vets-service
-To help with development, there is a basic starter project for the vets-service.
-
-. Open the project for `quarkus-petclinic-vets-service`
-+
-image::microservices/vets-service-files.png[width="600"]
-
-. Review the starter code for `quarkus-petclinic-vets-service`. View the following packages
-.. Model: `org.acme.model`
-.. Service: `org.acme.service`
-.. Resource: `org.acme.rest`
-
-. View the application configuration files in the directory: `src/main/resources`
-.. `application.properties`
-.. `import.sql`
-+
-[NOTE]
-====
-The `import.sql` file loads SQL statements when Hibernate ORM starts. This script can contain any SQL DML statements. Make sure to terminate each statement with a semicolon. This is useful to have a data set ready for your tests or demos.
-====
-
-== Add Resource method to Retrieve Vets
-
-Now let's add the resource method to retrieve the vets from the database. Developing REST APIs with Quarkus is similar to using Spring Boot. Quarkus uses JAX-RS from the Microprofile spec. 
-
-Here's a list of common annotations used for REST development.
+Developing REST APIs with Quarkus is similar with using Spring Boot. Quarkus uses JAX-RS from the Microprofile specifications. Here's a list of common annotations used for REST development in Sprinb and Quarkus:
 
 [options="header"]
 |===
@@ -76,31 +47,8 @@ Here's a list of common annotations used for REST development.
 | @RequestParam | @QueryParam
 |===
 
+We’ll first need to edit `VetsResource.java` class file in `src/main/java/org/acme/rest`, and add the following code under the `// TODO: Add the List method to retrieve the vets` comment:
 
-. Open the file: `VetsResource.java`
-** Make note of the base path for the resource. The resource endpoint is :`/vets` 
-+
-[source,java,role="copypaste"]
-----
-@Path("/vets")
----- 
-
-** Make note of the @Produces annotation. The endpoints for this resource will produce JSON content.
-+
-[source,java,role="copypaste"]
-----
-@Produces(MediaType.APPLICATION_JSON)
-----
-
-. Make note of the code that injects the VetsService
-+
-----
-    @Inject
-    VetsService service;
----- 
-
-. Make the following modification to the code. Add the method to retrieve the vets.
-+
 [source,java,role="copypaste"]
 ----
     @GET
@@ -109,239 +57,98 @@ Here's a list of common annotations used for REST development.
         return service.getAll();
     }
 ----
-* Be sure to add the following imports: 
-+
-[source,java,role="copypaste"]
+
+Also, don’t forget to add the import statement by un-commenting the import statement for VetsResource near the top
+
+[source,java]
 ----
 import java.util.List;
 import javax.ws.rs.GET;
 import org.acme.model.Vet;
 ----
 
-=== Run the vets-service
+Open a new CodeReady Workspaces Terminal and run the following commands to run the vets service locally:
 
-. Open a new Terminal window. You can use the **>_ New Terminal** command on the right:
-+
-image::cmd-terminal.png[codeready-workspace-terminal, 700]
-
-. Move to the project directory for the `vets-service`:
-+
-[source,sh,role="copypaste"]
+[source,console,role="copypaste"]
 ----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn quarkus:dev -Ddebug=7005 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
-
-. Run the service with the following command:
-+
-[source,sh,role="copypaste"]
-----
-mvn clean quarkus:dev -Ddebug=7005
-----
-+
-[NOTE]
-====
-The first time you build the app, new dependencies may be downloaded via maven. This should only happen once, after that things will go even faster.
-====
-
-* The `vets-service` is configured to listen port 7070 (based on configs in `application.properties`). We also specify the debug port manually to avoid a port conflict with services that we will run later.
-
-. CodeReady will also detect that the Quarkus app opens port `7070` for web requests. When prompted, *open the port `7070`*, which opens a small web browser in CodeReady.
-
-. When prompted, click on `Open Link` to redirect to the external URL of the the application.
-
-. You will initially see an error page in the web browser. However, append: `/vets` to the end of the web URL. Then you will see a list of vets as JSON.
-+
-image::microservices/run-local-vets-preview.png[]
-
-+
-. Once the `vets-service` is running, you should see the following output.
-+
-----
-Listening for transport dt_socket at address: 7005
-__  ____  __  _____   ___  __ ____  ______
- --/ __ \/ / / / _ | / _ \/ //_/ / / / __/
- -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \
---\___\_\____/_/ |_/_/|_/_/|_|\____/___/
-2020-10-21 12:16:45,173 INFO  [io.agr.pool] (Quarkus Main Thread) Datasource '<default>': Initial size smaller than min. Connections will be created when necessary
-2020-10-21 12:16:45,648 INFO  [io.quarkus] (Quarkus Main Thread) vets-service 1.0.0-SNAPSHOT on JVM (powered by Quarkus 1.8.1.Final) started in 2.367s. Listening on: http://0.0.0.0:7070
-2020-10-21 12:16:45,650 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-2020-10-21 12:16:45,650 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [agroal, cdi, hibernate-orm, hibernate-orm-panache, jdbc-h2, mutiny, narayana-jta, resteasy, resteasy-jackson, smallrye-context-propagation]
-----
-
-. Open a new terminal window
-
-. Call the service using the curl command
-+
-[source,sh,role="copypaste"]
-
-----
-curl http://localhost:7070/vets
-----
-
-. You should see the following output
-+
-----
-{"id":1,"firstName":"James","lastName":"Carter","specialties":[]},{"id":2,"firstName":"Helen","lastName":"Leary","specialties":[{"id":1,"name":"radiology"}]},{"id":3,"firstName":"Linda","lastName":"Douglas","specialties":[{"id":2,"name":"surgery"},{"id":3,"name":"dentistry"}]},{"id":4,"firstName":"Rafael","lastName":"Ortega","specialties":[{"id":2,"name":"surgery"}]},{"id":5,"firstName":"Henry","lastName":"Stevens","specialties":[{"id":1,"name":"radiology"}]},{"id":6,"firstName":"Sharon","lastName":"Jenkins","specialties":[]}]
-----
-
-You have successfully created the REST endpoint for the `vets-service` :-)
-
-== OpenAPI and Swagger UI
-Quarkus provides support for OpenAPI and Swagger UI. You can easily expose your API specification and allow the users to test it with the Swagger UI.
-
-In this section, you'll add OpenAPI support for the `vets-service`.
-
-image::microservices/swagger-start.png[width="400"]
-
-=== Adding Quarkus Smallrye OpenAPI extension
-
-Quarkus provides a smallrye-openapi extension compliant with the Eclipse MicroProfile OpenAPI specification in order to generate your API OpenAPI v3 specification.
-
-. Open the `pom.xml` file
-
-. Add the following dependency:
-+
-[source,xml,role="copypaste"]
-----
-<dependency>
-    <groupId>io.quarkus</groupId>
-    <artifactId>quarkus-smallrye-openapi</artifactId>
-</dependency>
-----
-
-=== View APIs with Swagger UI
-
-When building APIs, developers want to test them quickly. Swagger UI is a great tool permitting to visualize and interact with your APIs. The UI is automatically generated from your OpenAPI specification.
-
-The Quarkus smallrye-openapi extension comes with a swagger-ui extension embedding a properly configured Swagger UI page.
 
 [NOTE]
 ====
-By default, Swagger UI is only available when Quarkus is started in dev or test mode.
-
-If you want to make it available in production too, you can include the following configuration in your application.properties:
-
-`quarkus.swagger-ui.always-include=true`
-
-This is a build time property, it cannot be changed at runtime after your application is built.
+The vets service is configured to listen port *7070* based on configs in *application.properties*. We also specify the debug port manually to avoid a port conflict with services that we will run later.
 ====
 
-. Open the file: `src/main/resources/application.properties`
+Once the vets service is running, Open a new terminal window and invoke the RESTful endpoint using the following CURL commands:
 
-. Add the following configuration:
-+
 [source,sh,role="copypaste"]
+
 ----
-quarkus.swagger-ui.always-include=true
-----
-
-. Access the Swagger UI
-.. In a CodeReady Workspaces web browser (preview)
-.. Replace `/vets` with `swagger-ui` at the end of the URL.
-
-. Click the button to open the URL in a new web browser window
-+
-image::microservices/open-in-new-window.png[width="600"]
-
-. You should now see the Swagger UI
-+
-image::microservices/swagger-start.png[width="600"]
-
-. Select the endpoint: *GET /vets*
-
-. Click the buttons: *Try It Out* > *Execute*
-
-. You should see the following results.
-
-image::microservices/swagger-results.png[width="600"]
-
-=== Provide Global API information
-
-There are some MicroProfile OpenAPI annotations which describe global API information, such as the following:
-
-* API Title
-* API Description
-* Version
-* Contact Information
-* License
-
-All of this information (and more) can be configured in the application.properties. You also have the option to embed this in your Java code by using appropriate OpenAPI annotations.
-
-In this section, we will add this configuration to the `application.properties` file.
-
-. Open the file: `src/main/resources/application.properties`
-
-. Add the following configuration:
-+
-[source,role="copypaste"]
-----
-%dev.mp.openapi.extensions.smallrye.info.title=Vets API (development)
-%test.mp.openapi.extensions.smallrye.info.title=Vets API (test)
-mp.openapi.extensions.smallrye.info.title=Vets API
-mp.openapi.extensions.smallrye.info.version=1.0.1
-mp.openapi.extensions.smallrye.info.description=Provide endpoints for vets data.
-mp.openapi.extensions.smallrye.info.contact.email=techsupport@example.com
-mp.openapi.extensions.smallrye.info.contact.name=John TechSupport
-mp.openapi.extensions.smallrye.info.contact.url=http://exampleurl.com/contact
-mp.openapi.extensions.smallrye.info.license.name=Apache 2.0
-mp.openapi.extensions.smallrye.info.license.url=http://www.apache.org/licenses/LICENSE-2.0.html
+curl http://localhost:7070/vets | jq
 ----
 
-. Reload your web browser. You should see the need updates.
-+
-image::microservices/swagger-global-api-info.png[width="600"]
+The output looks like:
 
-== Refactor Web App to use vets-service
+[source,json]
+----
+...
+ {
+    "id": 5,
+    "firstName": "Henry",
+    "lastName": "Stevens",
+    "specialties": [
+      {
+        "id": 1,
+        "name": "radiology"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "firstName": "Sharon",
+    "lastName": "Jenkins",
+    "specialties": []
+  }
+]
+----
 
-Now that you have the microservice developed for the `vets-service`, you'll refactor the web app to use the service.
+*Great job!* You have successfully created a new microservice for the *vets service*.
 
-The web app will need to make HTTP calls to the the vets-service. The web app could manually make the calls, however this approach requires a lot of boiler-plate code and it is error prone.
+== Strangle the Petclinic Monolith
 
-As an alternative, you can use the MicroProfile Rest Client. The MicroProfile REST Client makes it easy to interact with REST APIs with very little effort.
+Now that you have a new microservice developed for the *vets service*, you'll strangle the existing Petclinic monolith to use the vets service.
+
+The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the *MicroProfile Rest Client* which is similar to *Spring Cloud Feign*. 
 
 The MicroProfile Rest Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
-Regarding Spring Cloud migration, *MicroProfile Rest Client* is similar to *Spring Cloud Feign*.
+Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady Workspaces Terminal:
 
-=== Add Maven Dependencies
-
-. Move to `quarkus-petclinic` project
-+
-image::microservices/petclinic-service-files.png[width="600"]
-
-. Open the file: `pom.xml`
-
-. Add the following dependencies:
-+
-[source,xml,role="copypaste"]
+[source,sh,role="copypaste"]
 ----
-<dependency>
-    <groupId>io.quarkus</groupId>
-    <artifactId>quarkus-rest-client</artifactId>
-</dependency>
-
-<dependency>
-    <groupId>io.quarkus</groupId>
-    <artifactId>quarkus-resteasy-jackson</artifactId>
-</dependency>
+mvn -q quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
-* `quarkus-rest-client` provides a Quarkus wrapper for the Microprofile Rest Client implementation
 
-* `quarkus-resteasy-jackson` handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
+You should see in the output:
 
-=== Develop MicroProfile Rest Client for `vets-service`
+[source,console]
+----
+✅ Extension io.quarkus:quarkus-resteasy-jackson has been installed
+✅ Extension io.quarkus:quarkus-rest-client has been installed
+----
 
-Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
+* *quarkus-rest-client* provides a Quarkus wrapper for the Microprofile Rest Client implementation
+* *quarkus-resteasy-jackson* handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
 
-1. Create a new package: `org.acme.rest.client`
+Let's develop a MicroProfile Rest Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
 
-2. In this package, create a new interface: `VetsRestClient`
+image::quarkus-petclinic-vetsclient.png[quarkus, 600]
 
-3. Add the following code:
-+
+Copy the following code to create a new VetsRestClient interface:
+
 [source,java,role="copypaste"]
 ----
-package org.acme.rest.client;
+package org.acme.client;
 
 import java.util.List;
 
@@ -354,184 +161,92 @@ import org.acme.model.Vet;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 @Path("/vets")
-@RegisterRestClient
+@RegisterRestClient // <1>
 public interface VetsRestClient {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Vet> getAll();
+    public List<Vet> getAll(); // <2>
 
 }
 ----
 
-* The `getAll` method gives our code the ability to retrieve a list of vets from the `vets-service`. The client will handle all the networking and marshalling leaving our code clean of such technical details.
+<1> *@RegisterRestClient* annotation allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client.
+<2> *getAll* method gives our code the ability to retrieve a list of vets from the _vets service_. The client will handle all the networking and marshalling leaving our code clean of such technical details.
 
-* The purpose of the annotations in the code above is the following:
+In order to determine the base URL to which REST calls will be made, the REST Client uses configuration from _application.properties_. The name of the property needs to follow a certain convention for naming.
 
-** `@RegisterRestClient` allows Quarkus to know that this interface is meant to be available for CDI injection as a REST Client
+Open `application.properties` file in `src/main/resources` of quarkus-petclinic project then append the following configuration:
 
-** `@Path` and `@GET` are the standard JAX-RS annotations used to define how to access the service
-
-** `@Produces` defines the expected content-type
-+
-[NOTE]
-====
-While `@Consumes` and `@Produces` are optional as auto-negotiation is supported, it is heavily recommended to annotate your endpoints with them to define precisely the expected content-types.
-
-It will allow to narrow down the number of JAX-RS providers (which can be seen as converters) included in the native executable.
-====
-
-=== Create the configuration
-
-In order to determine the base URL to which REST calls will be made, the REST Client uses configuration from `application.properties`. The name of the property needs to follow a certain convention for naming.
-
-. Make sure you are still in the `quarkus-petclinic` project
-
-. Open the file: `src/main/resources/application.properties`
-
-. Add the following configuration:
-+
-[source,role="copypaste"]
+[source,shell,role="copypaste"]
 ----
-%dev.org.acme.rest.client.VetsRestClient/mp-rest/url=http://localhost:7070
-%dev.org.acme.rest.client.VetsRestClient/mp-rest/scope=javax.inject.Singleton
+%dev.org.acme.client.VetsRestClient/mp-rest/url=http://localhost:7070 // <1>
+%dev.org.acme.client.VetsRestClient/mp-rest/scope=javax.inject.Singleton // <2>
 ----
 
-* The first line for configuration means that all requests performed using `org.acme.rest.client.VetsRestClient` will use http://localhost:7070 as the base URL. Using the configuration above, calling the `getAll()`` method of `VetsRestClient` would result in an HTTP GET request being made to http://localhost:7070/vets. This configuration is prefixed with `%dev` for the DEV profile.
-
-* The second line for configuration means that the default scope of `org.acme.rest.client.VetsRestClient` will be @Singleton. Supported scope values are @Singleton, @Dependent, @ApplicationScoped and @RequestScoped. The default scope is @Dependent. The default scope can also be defined on the interface.
+<1> All requests performed using _VetsRestClient_ will use http://localhost:7070 as the base URL. Using the configuration above, calling the _getAll()_ method of _VetsRestClient_ would result in an HTTP GET request being made to http://localhost:7070/vets. 
+<2> The default scope of VetsRestClient will be _@Singleton_. Supported scope values are @Singleton, @Dependent, @ApplicationScoped and @RequestScoped. The default scope is @Dependent. The default scope can also be defined on the interface.
 
 [NOTE]
 ====
-It is important that `org.acme.rest.client.VetsRestClient` must match the fully qualified name of the `VetsRestClient` interface we created in the previous section.
+It is important that `org.acme.client.VetsRestClient` must match the fully qualified name of the `VetsRestClient` interface we created in the previous section.
 ====
 
-=== Update VetsResource
+Now you'll modify the existing _VetResource_ file to communicate with _VetsRestClient_ rather than the existing _VetsService_.
 
-Now you'll modify the VetResource in your web app. Instead of communicating with the VetsService, instead you will use the VetsRestClient.
+Open `VetsResource.java` class file in `src/main/java/org/acme/rest` then add the following code under the `// TODO: Inject RestClient Bean` comment:
 
-. Make sure you are still in the `quarkus-petclinic` project
-
-. Move to the package: `org.acme.rest`
-
-. Open the file: `VetsResource.java`
-
-. Add the following code:
-+
 [source,java,role="copypaste"]
 ----
     @Inject
     @RestClient
     VetsRestClient vetsRestClient;
-
-    static Logger LOG = Logger.getLogger(VetsResource.class);   
-----
-* Be sure to add the following imports: 
-+
-[source,java,role="copypaste"]
-----
-import org.acme.rest.client.VetsRestClient;
-import org.eclipse.microprofile.rest.client.inject.RestClient;
-import org.jboss.logging.Logger;
 ----
 
-. Update the get() method with the following code:
-+
+Replace `get()` method with the following code to invoke _vetsRestClient_:
+
 [source,java,role="copypaste"]
 ----
     @GET
     @Produces(MediaType.TEXT_HTML)
     public TemplateInstance get() {
-
-        LOG.debug("Calling vetsRestClient");
         List<Vet> data = vetsRestClient.getAll();
-        LOG.debug("Received data from vetsRestClient: " + data);
-
         return vets.data("active", "vets")
                 .data("vets", data);
     }
 ----
-* Be sure to add the following imports: 
-+
+
+Add the necessary imports below the existing `import` statements near the top of the file:
+
 [source,java,role="copypaste"]
 ----
 import java.util.List;
 import org.acme.model.Vet;
+
+import org.acme.client.VetsRestClient;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 ----
 
-* Notice that we retrieve the list of vets from the `vetsRestClient`. This data is then placed into the Qute template for later display. 
+Delete unnecessary _VetsService_ references since we are no longer using it. Comment `// TODO: Inject CDI Bean` in `VetsResource` class file:
 
-. In `VetsResource.java`, you can delete all references to the `VetsService` class since we are no longer using it.
-
-. Delete the file: `VetsService.java` in the package `org.acme.service`
-
-. Make sure there are no compilation errors in your code.
-
-=== View the Pet Clinic web app
-
-. Move back to your web browser where the Pet Clinic web app is running.
-
-. Click the link for *Vets*.
-+
-image::microservices/vets-navigation-link.png[]
-
-. You should see the following output.
-+
-image::microservices/vets-list.png[]
-
-=== Monolith Cleanup Work
-
-Now that the `vets-service` is running as a separate Microservice, we can clean up some of the code in the Pet Clinic web app. In particular, we can clean up the following
-
-** Remove database entries from import.sql
-** Remove Panache support from Vet model objects
-
-==== Remove database entries from import.sql
-
-. Make sure you are still in the `quarkus-petclinic` project
-
-. Move to the directory: `src/main/resources`
-
-. Open the file: `import.sql`
-
-. Delete the following lines:
-+
-[source,sql,role="copypaste"]
+[source,java]
 ----
-INSERT INTO vets VALUES (1, 'James', 'Carter');
-INSERT INTO vets VALUES (2, 'Helen', 'Leary');
-INSERT INTO vets VALUES (3, 'Linda', 'Douglas');
-INSERT INTO vets VALUES (4, 'Rafael', 'Ortega');
-INSERT INTO vets VALUES (5, 'Henry', 'Stevens');
-INSERT INTO vets VALUES (6, 'Sharon', 'Jenkins');
-
-INSERT INTO specialties VALUES (1, 'radiology');
-INSERT INTO specialties VALUES (2, 'surgery');
-INSERT INTO specialties VALUES (3, 'dentistry');
-
-INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 2, 1);
-INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 2);
-INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 3);
-INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 4, 2);
-INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 5, 1);
+    // // TODO: Inject CDI Bean
+    // @Inject 
+    // VetsService service; 
 ----
 
-* This data is no longer required in the Pet Clinic web app because this data is now managed by the `vets-service`. The `vets-service` has a separate database for vet related data.
+Comment the following package:
+
+[source,java]
+----
+// import org.acme.service.VetsService;
+----
 
 ==== Remove Panache support from Vet model objects
 
-At this point in the Pet Clinic web app is a `client` to the `vets-service. As a result, the Vet model objects are simply data transfer objects (DTOs). There is no longer a requirement for the Pet Clinic web app to directly persist Vet model objects using Panache.
+At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to expand the *Panache* class. Open `Vet.java` class file in `src/main/java/org/acme/model` then *replace* the following code:
 
-You can remove the Panache support from the Vet models objects.
-
-. Make sure you are still in the `quarkus-petclinic` project
-
-. Move to the package: `org.acme.model`
-
-. Open the file: `Vet.java`
-
-. Replace the content with following code:
-+
 [source,java,role="copypaste"]
 ----
 package org.acme.model;
@@ -540,21 +255,16 @@ import java.util.List;
 
 public class Vet {
 
-	public long id;
-	
-	public String firstName;
-
-	public String lastName;
-
+    public long id;
+    public String firstName;
+    public String lastName;
     public List<Specialty> specialties;
-	
+
 }
 ----
 
-. Open the file `Specialty.java`
+Open `Specialty.java` class file in `src/main/java/org/acme/model` then *replace* the following code:
 
-. Replace the content with following code:
-+
 [source,java,role="copypaste"]
 ----
 package org.acme.model;
@@ -562,20 +272,214 @@ package org.acme.model;
 import java.util.List;
 
 public class Specialty {
-  
-    public long id;
-    
-    public String name;
 
+    public long id;
+    public String name;
     public List<Vet> vets;
 
 }
 ----
 
-. Test your app and verify that it works as desired.
+Run the following command to delete `VetsService.java` file in CodeReady Workspaces Terminal:
 
-=== Clean Up
+[source,sh,role="copypaste"]
+----
+rm -rf $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
+----
 
-. Move into your terminal windows and stop the running applications for `vets-service` and `pet-clinic`.
+The existing data in monolith Petclinic application is no longer required because the data is now managed by the new _vets service_ withe a separated database. Comment the following database entries in `import.sql` file:
 
-Congratulations! You successfully retrieved a list of vets from the vets-service microservice. You also took the first major step of strangling the monolith application.
+[source,sql]
+----
+-- INSERT INTO vets VALUES (1, 'James', 'Carter');
+-- INSERT INTO vets VALUES (2, 'Helen', 'Leary');
+-- INSERT INTO vets VALUES (3, 'Linda', 'Douglas');
+-- INSERT INTO vets VALUES (4, 'Rafael', 'Ortega');
+-- INSERT INTO vets VALUES (5, 'Henry', 'Stevens');
+-- INSERT INTO vets VALUES (6, 'Sharon', 'Jenkins');
+
+-- INSERT INTO specialties VALUES (1, 'radiology');
+-- INSERT INTO specialties VALUES (2, 'surgery');
+-- INSERT INTO specialties VALUES (3, 'dentistry');
+
+-- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 2, 1);
+-- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 2);
+-- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 3, 3);
+-- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 4, 2);
+-- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 5, 1);
+----
+
+Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page:
+
+image::quarkus-vets-data.png[spring-schema.png, 900]
+
+*Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essense of time, We will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
+
+image::remain-microservices.png[quarkus, 600]
+
+== Deploy to PostgreSQL in Production
+
+Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (e.g. `{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
+
+image::ocplogin.png[login,600]
+
+Once logged in, click on the name of your project (`{{ USER_ID }}-project`):
+
+image::ocpproj.png[project,600]
+
+Switch to the _Developer Perspective_ using the upper-left drop-down:
+
+image::devperspective.png[perspective, 700]
+
+click **+Add** on the left, on the _Database_ box on the project overview:
+
+image::db.png[db, 700]
+
+Type in `postgres` in the search box, and click on the *PostgreSQL (ephemeral)*:
+
+image::db-postgres.png[db, 700]
+
+Click on *Instantiate Template* and fill in the following fields, leaving the others as their default values:
+
+* **Namespace** (the first one): Select `{{ USER_ID }}-project`
+* **Namespace** (the _second_ one): `openshift`
+* **Database Service Name**: `vets-database`
+* **PostgreSQL Connection Username**: `vets`
+* **PostgreSQL Connection Password**: `mysecretpassword`
+* **PostgreSQL Database Name**: `vets`
+
+image::db-postgres-values.png[db, 700]
+
+Click *Create*.
+
+== Login to OpenShift
+
+Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Click on **Login to OpenShift**, and enter your given credentials:
+
+* Username: **`{{ USER_ID }}`**
+* Password: **`{{ OPENSHIFT_USER_PASSWORD }}`**
+
+image::cmd-login.png[login,700]
+
+[WARNING]
+====
+Use the username and password you were assigned by the instructor.
+====
+
+You should see:
+
+[source, none]
+----
+Login successful.
+
+You have one project on this server: "{{ USER_ID }}-project"
+
+Using project "{{ USER_ID }}-project".
+Welcome! See 'oc help' to get started.
+----
+
+[NOTE]
+====
+After you log in using *Login to OpenShift*, the terminal is no longer usable as a regular terminal. You can close the terminal window. You will still be logged in when you open more terminals later!
+====
+
+Congratulations, you are now authenticated to the OpenShift server via the CLI. We'll use the prettier web console later on in this lab.
+
+[WARNING]
+====
+The login session might timeout after long periods of inactivity. If this happens, you'll get messages like `Error from server (Forbidden): xxxxx is forbidden: User "system:anonymous" cannot xxxxx`. Simply login again!
+====
+
+https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/[Namespaces^] are a top level concept to help you organize your deployments and teams of developers. A namespace allows a community of users (or a user) to organize and manage
+their content in isolation from other communities. OpenShift _projects_ provide additional functionality for managing Kubernetes namespaces.
+
+== Deploy Vets Service to OpenShift
+
+Let’s deploy our new Quarkus vets microservices to OpenShift! Quarkus offers the ability to automatically generate OpenShift resources based on sane default and user supplied configuration. The OpenShift extension is actually a wrapper extension that brings together the https://quarkus.io/guides/deploying-to-kubernetes[kubernetes^] and https://quarkus.io/guides/container-image#s2i[container-image-s2i^] extensions with defaults so that it’s easier for the user to get started with Quarkus on OpenShift.
+
+Add _openshift_ extension via CodeReady Workspaces Terminal:
+
+[source,sh,role="copypaste"]
+----
+mvn -q quarkus:add-extension -Dextensions="openshift" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+----
+
+you will see:
+
+[source,console]
+----
+✅ Extension io.quarkus:quarkus-openshift has been installed
+----
+
+Append the following variables in `src/main/resources/application.properties`:
+
+[source,shell,role="copypaste"]
+----
+%prod.quarkus.datasource.url=jdbc:postgresql://vets-database:5432/vets
+%prod.quarkus.datasource.driver=org.postgresql.Driver
+%prod.quarkus.datasource.username=vets
+%prod.quarkus.datasource.password=mysecretpassword
+%prod.quarkus.datasource.max-size=8
+%prod.quarkus.datasource.min-size=2
+%prod.quarkus.hibernate-orm.database.generation=drop-and-create
+%prod.quarkus.hibernate-orm.sql-load-script=import.sql
+%prod.quarkus.hibernate-orm.log.sql=true
+
+%prod.quarkus.kubernetes-client.trust-certs=true<1>
+%prod.quarkus.container-image.build=true<2>
+%prod.quarkus.kubernetes.deploy=true<3>
+%prod.quarkus.kubernetes.deployment-target=openshift<4>
+%prod.quarkus.openshift.expose=true<5>
+%prod.quarkus.openshift.labels.app.openshift.io/runtime=quarkus<6>
+----
+
+<1> We are using self-signed certs in this simple example, so this simply says to the extension to trust them.
+<2> Instructs the extension to build a container image
+<3> Instructs the extension to deploy to OpenShift after the container image is built
+<4> Instructs the extension to generate and create the OpenShift resources (like `DeploymentConfig` and `Service`) after building the container
+<5> Instructs the extension to generate an OpenShift `Route`.
+<6> Adds a nice-looking icon to the app when viewing the OpenShift Developer Toplogy
+
+Build and deploy the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+
+[source,sh,role="copypaste"]
+----
+mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+----
+
+As you recall, the output of this process is a native Linux binary but also running Source-To-Image(S2I) build processor.
+
+**Wait for it to finish!**. You should get a **BUILD SUCCESS** message at the end. Once that's done, make sure it's actually done rolling out:
+
+[source,sh,role="copypaste"]
+----
+oc rollout status -w dc/vets-service
+----
+
+[NOTE]
+====
+`dc` in `dc/vets-service` is shorthand for OpenShift's _DeploymentConfig_ object type. There are other shortcuts like `bc` for _BuildConfig_, `svc` for Kubernetes _Services_, and so on.
+====
+
+Wait for that command to report `replication controller "vets-service-1" successfully rolled out` before continuing.
+
+And now we can access using `curl` once again. In the Terminal, run this command to access the endpoint:
+
+[source,sh,role="copypaste copypaste"]
+----
+curl $(oc get route vets-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/vets | jq
+----
+
+And label the items with proper icons:
+
+[source,sh,role="copypaste"]
+----
+oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
+oc label dc/vets-service app.kubernetes.io/part-of=vets-app --overwrite && \
+oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite && \
+oc annotate dc/ets-service app.openshift.io/connects-to=vets-database --overwrite
+----
+
+This will deploy the database to our new project. Click on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
+
+image::database-deployment.png[inventory_db_deployments, 700]

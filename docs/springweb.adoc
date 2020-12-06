@@ -259,6 +259,9 @@ public class OwnersResource {
 
     // TODO: Inject editOwner template
 
+
+    // TODO: Inject RestClient Bean
+
     @GET
     @Produces(MediaType.TEXT_HTML)
     @Path("owners")
