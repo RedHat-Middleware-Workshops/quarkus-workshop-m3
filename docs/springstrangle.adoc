@@ -521,8 +521,10 @@ When the script completes, the app is deployed to OpenShift. Back on the {{ CONS
 
 image::topology-view.png[topology-view.png, 900]
 
-Click on `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. Let's do a quick sanity test if new microservices are working well. Click on http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
+Click on `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. 
+
+Let's do a quick sanity test if new microservices are working well. Click on http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
 
-*Congratulations!* You have successfully strangled monolith `Spring Petclinic application` to `Quarkus microservices` then deployed them to OpenShift!
+*Congratulations!* You have successfully strangled monolith `Spring monolith application` to `Quarkus microservices` then deployed them to OpenShift!
