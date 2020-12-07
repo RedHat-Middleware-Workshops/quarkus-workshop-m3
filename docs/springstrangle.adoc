@@ -15,11 +15,11 @@ image::spring2quarkus-strangle-diagram.png[quarkus, 700]
 * *Visits Service* manages the data to perform CRUD operations for pet visits.
 * *Customers Service* manages the data for owners and pets. It is a composition of the original modules for owners and pets because it would be easier to handle the database tight-relationships between owners and pets.
 
-== Create New Vets Microserivces
+== Create new vets microservice
 
 Let's break the vets module into a single microservice with a separated lightweight database that only contains information for its related entity. Based on this approach, a new vets service has the following architecture:
 
-image::microservices/vets-service-architecture.png[quarkus, 400]
+image::microservices/vets-service-architecture.png[quarkus, 500]
 
 In the project explorer, expand the *quarkus-petclinic-vets-service* project.
 
@@ -243,8 +243,6 @@ Comment the following package:
 // import org.acme.service.VetsService;
 ----
 
-==== Remove Panache support from Vet model objects
-
 At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to expand the *Panache* class. Open `Vet.java` class file in `src/main/java/org/acme/model` then *replace* the following code:
 
 [source,java,role="copypaste"]
@@ -352,6 +350,14 @@ image::db-postgres-values.png[db, 700]
 
 Click *Create*.
 
+And label the items with proper icons:
+
+[source,sh,role="copypaste"]
+----
+oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
+oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite
+----
+
 == Login to OpenShift
 
 Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Click on **Login to OpenShift**, and enter your given credentials:
@@ -393,7 +399,7 @@ The login session might timeout after long periods of inactivity. If this happen
 https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/[Namespaces^] are a top level concept to help you organize your deployments and teams of developers. A namespace allows a community of users (or a user) to organize and manage
 their content in isolation from other communities. OpenShift _projects_ provide additional functionality for managing Kubernetes namespaces.
 
-== Deploy Vets Service to OpenShift
+== Deploy vets microservice to OpenShift
 
 Let’s deploy our new Quarkus vets microservices to OpenShift! Quarkus offers the ability to automatically generate OpenShift resources based on sane default and user supplied configuration. The OpenShift extension is actually a wrapper extension that brings together the https://quarkus.io/guides/deploying-to-kubernetes[kubernetes^] and https://quarkus.io/guides/container-image#s2i[container-image-s2i^] extensions with defaults so that it’s easier for the user to get started with Quarkus on OpenShift.
 
@@ -431,6 +437,9 @@ Append the following variables in `src/main/resources/application.properties`:
 %prod.quarkus.kubernetes.deployment-target=openshift<4>
 %prod.quarkus.openshift.expose=true<5>
 %prod.quarkus.openshift.labels.app.openshift.io/runtime=quarkus<6>
+%prod.quarkus.openshift.part-of=vets-app
+%prod.quarkus.openshift.component=rest-api
+%prod.quarkus.openshift.annotations."app.openshift.io/connects-to"=vets-database
 ----
 
 <1> We are using self-signed certs in this simple example, so this simply says to the extension to trust them.
@@ -470,16 +479,50 @@ And now we can access using `curl` once again. In the Terminal, run this command
 curl $(oc get route vets-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/vets | jq
 ----
 
-And label the items with proper icons:
+The output looks like:
 
-[source,sh,role="copypaste"]
+[source,json]
 ----
-oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
-oc label dc/vets-service app.kubernetes.io/part-of=vets-app --overwrite && \
-oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite && \
-oc annotate dc/ets-service app.openshift.io/connects-to=vets-database --overwrite
+...
+ {
+    "id": 5,
+    "firstName": "Henry",
+    "lastName": "Stevens",
+    "specialties": [
+      {
+        "id": 1,
+        "name": "radiology"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "firstName": "Sharon",
+    "lastName": "Jenkins",
+    "specialties": []
+  }
+]
 ----
 
-This will deploy the database to our new project. Click on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
+This will deploy the new vets service to our new project. Click on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
 
-image::database-deployment.png[inventory_db_deployments, 700]
+image::vets-deployment.png[inventory_db_deployments, 700]
+
+*Great job!* Let's build and deploy the remaining microservices(_Visits_, _Customers_, _Web_) to OpenShift by executing the following shell script in a CodeReady Workspaces Terminal:
+
+[source, shell, role="copypaste"]
+----
+sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_ID }}
+----
+
+Wait for the script to complete before continuing. It normally takes a few minutes to deploy 3 applications and databases to OpenShift.
+
+When the script completes, the app is deployed to OpenShift. Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^], make sure it's done deploying (dark blue circle):
+
+image::topology-view.png[topology-view.png, 900]
+
+Click on `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. Let's do a quick sanity test if new microservices are working well. Click on http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
+
+image::owners-detail-view.png[owners-detail-view.png, 900]
+
+*Congratulations!* You have successfully strangled monolith Spring Petclinic application to Quarkus microservices then deployed them to OpenShift!
