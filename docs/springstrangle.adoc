@@ -348,15 +348,7 @@ Click on *Instantiate Template* and fill in the following fields, leaving the ot
 
 image::db-postgres-values.png[db, 700]
 
-Click *Create*.
-
-And label the items with proper icons:
-
-[source,sh,role="copypaste"]
-----
-oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
-oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite
-----
+Click *Create*. 
 
 == Login to OpenShift
 
@@ -504,6 +496,14 @@ The output looks like:
 ]
 ----
 
+And label the items with proper icons:
+
+[source,sh,role="copypaste"]
+----
+oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
+oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite
+----
+
 This will deploy the new vets service to our new project. Click on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
 
 image::vets-deployment.png[inventory_db_deployments, 700]
@@ -525,4 +525,4 @@ Click on `Open URL` then you will see the landing page of Quarkus Petclinic appl
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
 
-*Congratulations!* You have successfully strangled monolith Spring Petclinic application to Quarkus microservices then deployed them to OpenShift!
+*Congratulations!* You have successfully strangled monolith `Spring Petclinic application` to `Quarkus microservices` then deployed them to OpenShift!
