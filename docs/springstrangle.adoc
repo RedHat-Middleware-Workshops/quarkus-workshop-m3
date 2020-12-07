@@ -58,7 +58,7 @@ We’ll first need to edit `VetsResource.java` class file in `src/main/java/org/
     }
 ----
 
-Also, don’t forget to add the import statement by un-commenting the import statement for VetsResource near the top
+Also, don’t forget to add the import statement by un-commenting the import statement for VetsResource near the top:
 
 [source,java]
 ----
