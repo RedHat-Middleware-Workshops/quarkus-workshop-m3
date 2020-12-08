@@ -319,11 +319,11 @@ image::remain-microservices.png[quarkus, 600]
 
 Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (e.g. `{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
 
-image::ocplogin.png[login,600]
+image::ocplogin.png[login,700]
 
 Once logged in, click on the name of your project (`{{ USER_ID }}-project`):
 
-image::ocpproj.png[project,600]
+image::ocpproj.png[project,700]
 
 Switch to the _Developer Perspective_ using the upper-left drop-down:
 

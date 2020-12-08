@@ -3,7 +3,7 @@
 
 *Spring Cloud* is a framework for building microservices applications with Spring but also includes support for *non-functional microservices capabilities* such as configuration management, service discovery, resiliency, load balancing, distributed logging, and so on. The main goal of Spring Cloud is to allow developers to quickly build microservices along with common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
 
-A frequently asked question is _“how does Quarkus with OpenShift handle the Spring Cloud capabilities?”_ In this lab, you will learn how efficiently Quarkus with OpenShift allows developers to integrate non-functional microservices capabilities into Kubernetes resources in *Kubernetes Native way*. 
+A frequently asked question is *how does Quarkus with OpenShift handle the Spring Cloud capabilities?* In this lab, you will learn how efficiently Quarkus with OpenShift allows developers to integrate non-functional microservices capabilities into Kubernetes resources in *Kubernetes Native way*. 
 
 == Direct Access to OpenShift ConfigMaps and Secrets
 
@@ -26,7 +26,7 @@ data:
   message.hello.quarkus: Kubernetes Native Java, Quarkus
 ----
 
-image::myconfigmap.png[configmap.png, 900]
+image::myconfigmap.png[configmap.png, 700]
 
 Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project in CodeReady Workspaces Terminal:
 
@@ -199,17 +199,17 @@ You now see the default health check, along with your new customer(owner) health
 You can define separate readiness and liveness probes using `@Liveness` and `@Readiness` annotations and access them separately at `/health/live` and `/health/ready`.
 ====
 
-Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^]. Click on `DC(customers-service)` then select `Edit Health Checks` in *Actions* dropbox:
+Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] and click on `DC(customers-service)` then select `Edit Health Checks` in *Actions* dropbox:
 
 image::customers-dc.png[health.png, 900]
 
 You should see `Readiness Probe` and `Liveness Probe` are already added along with Quarkus MicroProfile health specification:
 
-image::health-probe.png[health.png, 900]
+image::health-probe.png[health.png, 700]
 
 Click on `Edit Probe` in _Readniess Probe_ then you should see the way to check if the container is ready to handle requests. A failed readiness probe means that a container should not receive any traffic from a proxy, even if it's running:
 
-image::readiness-probe.png[health.png, 900]
+image::readiness-probe.png[health.png, 700]
 
 == Congratulations!
 
