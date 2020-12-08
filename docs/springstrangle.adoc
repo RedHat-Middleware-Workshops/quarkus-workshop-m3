@@ -19,7 +19,7 @@ image::spring2quarkus-strangle-diagram.png[quarkus, 700]
 
 Let's break the vets module into a single microservice with a separated lightweight database that only contains information for its related entity. Based on this approach, a new vets service has the following architecture:
 
-image::vets-service-architecture.png[quarkus, 500]
+image::vets-service-architecture.png[quarkus, 400]
 
 In the project explorer, expand the *quarkus-petclinic-vets-service* project.
 
