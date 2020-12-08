@@ -176,7 +176,7 @@ public interface VetsRestClient {
 
 In order to determine the base URL to which REST calls will be made, the REST Client uses configuration from _application.properties_. The name of the property needs to follow a certain convention for naming.
 
-Open `application.properties` file in `src/main/resources` of quarkus-petclinic project then append the following configuration:
+Open `application.properties` file in `src/main/resources` of *quarkus-petclinic* project then append the following configuration:
 
 [source,shell,role="copypaste"]
 ----
@@ -194,7 +194,7 @@ It is important that `org.acme.client.VetsRestClient` must match the fully quali
 
 Now you'll modify the existing _VetResource_ file to communicate with _VetsRestClient_ rather than the existing _VetsService_.
 
-Open `VetsResource.java` class file in `src/main/java/org/acme/rest` then add the following code under the `// TODO: Inject RestClient Bean` comment:
+Open `VetsResource.java` class file in `src/main/java/org/acme/rest` of *quarkus-petclinic* project then add the following code under the `// TODO: Inject RestClient Bean` comment:
 
 [source,java,role="copypaste"]
 ----
@@ -243,7 +243,7 @@ Comment the following package:
 // import org.acme.service.VetsService;
 ----
 
-At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to expand the *Panache* class. Open `Vet.java` class file in `src/main/java/org/acme/model` then *replace* the following code:
+At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to expand the *Panache* class. Open `Vet.java` class file in `src/main/java/org/acme/model` of *quarkus-petclinic* project then *replace* the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -261,7 +261,7 @@ public class Vet {
 }
 ----
 
-Open `Specialty.java` class file in `src/main/java/org/acme/model` then *replace* the following code:
+Open `Specialty.java` class file in `src/main/java/org/acme/model` of *quarkus-petclinic* project then *replace* the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -285,7 +285,7 @@ Run the following command to delete `VetsService.java` file in CodeReady Workspa
 rm -rf $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
 ----
 
-The existing data in monolith Petclinic application is no longer required because the data is now managed by the new _vets service_ withe a separated database. Comment the following database entries in `import.sql` file:
+The existing data in monolith Petclinic application is no longer required because the data is now managed by the new _vets service_ withe a separated database. Comment the following database entries in `import.sql` file of *quarkus-petclinic* project:
 
 [source,sql]
 ----
@@ -395,19 +395,9 @@ their content in isolation from other communities. OpenShift _projects_ provide 
 
 Let’s deploy our new Quarkus vets microservices to OpenShift! Quarkus offers the ability to automatically generate OpenShift resources based on sane default and user supplied configuration. The OpenShift extension is actually a wrapper extension that brings together the https://quarkus.io/guides/deploying-to-kubernetes[kubernetes^] and https://quarkus.io/guides/container-image#s2i[container-image-s2i^] extensions with defaults so that it’s easier for the user to get started with Quarkus on OpenShift.
 
-Add _openshift_ extension via CodeReady Workspaces Terminal:
+For your convenience, we've already added _quarkus-openshift_ extension to vets-service project:
 
-[source,sh,role="copypaste"]
-----
-mvn -q quarkus:add-extension -Dextensions="openshift" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
-----
-
-you will see:
-
-[source,console]
-----
-✅ Extension io.quarkus:quarkus-openshift has been installed
-----
+image::vets-pom.png[vets-pom.png, 700]
 
 Append the following variables in `src/main/resources/application.properties`:
 
@@ -514,6 +504,13 @@ image::vets-deployment.png[inventory_db_deployments, 700]
 ----
 sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_ID }}
 ----
+
+[NOTE]
+====
+You might have a failure(_i.e. visits-service: Failed to build quarkus application: io.quarkus.builder.BuildException: Build failure: Build failed due to errors_) while one of services is building then you need to deploy a certain service like:
+
+sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-visits-service.sh
+====
 
 Wait for the script to complete before continuing. It normally takes a few minutes to deploy 3 applications and databases to OpenShift.
 

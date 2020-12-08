@@ -21,7 +21,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: myconfigmap
-  namespace: user1-project
+  namespace: {{ USER }}-project
 data:
   message.hello.quarkus: Kubernetes Native Java, Quarkus
 ----
@@ -47,7 +47,7 @@ You should see in the output:
 ✅ Extension io.quarkus:quarkus-kubernetes-config has been installed
 ----
 
-Open `application.properties` file in `src/main/resources` of quarkus-petclinic-web-v2 project then append the following configuration:
+Open `application.properties` file in `src/main/resources` of *quarkus-petclinic-web-v2* project then append the following configuration:
 
 [source,shell,role="copypaste"]
 ----
@@ -60,12 +60,24 @@ Open `application.properties` file in `src/main/resources` of quarkus-petclinic-
 The properties obtained from the ConfigMaps and Secrets have a higher priority than (i.e. they override) any properties of the same name that are found in _application.properties_ (or the YAML equivalents), but they have lower priority than properties set via Environment Variables or Java System Properties. Furthermore, when multiple ConfigMaps (or Secrets) are used, ConfigMaps (or Secrets) defined later in the list have a higher priority that ConfigMaps defined earlier in the list. Finally, when both ConfigMaps and Secrets are used, the latter always a higher priority than the former.
 ====
 
-Open `WelcomeResource.java` class file in `src/main/java/org/acme/rest` of quarkus-petclinic-web-v2 project, and add the following code:
+Open `WelcomeResource.java` class file in `src/main/java/org/acme/rest` of *quarkus-petclinic-web-v2* project, and add the following code:
 
 [source,java,role="copypaste"]
 ----
     @ConfigProperty(name = "message.hello.quarkus")
     String message;
+----
+
+Then replace `get()` method with the following codes:
+
+[source,java,role="copypaste"]
+----
+    @GET
+    @Produces(MediaType.TEXT_HTML)
+    public TemplateInstance get() {
+        return welcome.data("active", "home")
+                .data("message", message);
+    }
 ----
 
 Also, don’t forget to add the import statement by adding the import statement for *WelcomeResource* near the top:
@@ -75,7 +87,7 @@ Also, don’t forget to add the import statement by adding the import statement 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 ----
 
-Let's the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of quarkus-petclinic-web-v2 project, and replace the following code:
+Let's the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of *quarkus-petclinic-web-v2* project, and replace the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -89,10 +101,9 @@ Let's the Qute template to show the message that refers to OpenShift ConfigMap. 
 mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
 ----
 
-When the build completes, the app is deployed to OpenShift. Back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
+When the build and deployment complete, the app is deployed to OpenShift. Back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
 
 image::quarkus-welcome-configmap.png[configmap.png, 900]
-
 
 == Add Health Probe to Quarkus
 
@@ -100,7 +111,7 @@ Spring Cloud has in-application libraries for creating resilient, fault-tolerant
 
 Quarkus application can utilize the *MicroProfile Health* specification through the _SmallRye Health_ extension to provide information about their state(_liveness_ and _readiness_) to external viewers which is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
 
-When you deployed the the remaining microservices(_Visits_, _Customers_, _Web_), the `/health `endpoint in each microservice is automatically exposed directly that can be used to run the health check procedures. For example, the *customers* service is still running, so you can exercise the default (no-op) health check with this command in a separate Terminal:
+When you deployed the the remaining microservices(_Visits_, _Customers_, _Web_), the `/health` endpoint in each microservice is automatically exposed directly that can be used to run the health check procedures. For example, the *customers* service is still running, so you can exercise the default (no-op) health check with this command in a separate Terminal:
 
 [source,sh,role="copypaste copypaste"]
 ----
@@ -124,7 +135,7 @@ The output shows:
 
 The general _outcome_ of the health check is computed as a logical AND of all the declared health check procedures. Quarkus extensions can also provide default health checks out of the box, which is why you see the `Database connections health check` above, since we are using a database extension.
 
-Let’s fill in the class by creating a new RESTful endpoint which will be used by OpenShift to probe our services. Open empty `OwnersHealthCheck.java` class file in `src/main/java/org/acme/rest` of _quarkus-petclinic-customers-service_ project, and add the following code:
+Let’s fill in the class by creating a new RESTful endpoint which will be used by OpenShift to probe our services. Open an empty `OwnersHealthCheck.java` class file in `src/main/java/org/acme/rest` of *quarkus-petclinic-customers-service* project, and add the following code:
 
 [source,java,role="copypaste"]
 ----
