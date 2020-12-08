@@ -527,4 +527,6 @@ Let's do a quick sanity test if new microservices are working well. Click on htt
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
 
-*Congratulations!* You have successfully strangled monolith `Spring monolith application` to `Quarkus microservices` then deployed them to OpenShift!
+== Congratulations!
+
+You have successfully strangled monolith `Spring monolith application` to `Quarkus microservices` then deployed them to OpenShift!

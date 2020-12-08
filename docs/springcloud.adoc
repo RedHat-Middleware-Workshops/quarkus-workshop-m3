@@ -1,827 +1,216 @@
-== Spring Cloud
+= Spring to Kubernetes Native with Quarkus
+:experimental:
 
-=== Comparing Spring Cloud to Quarkus/OpenShift
+*Spring Cloud* is a framework for building microservices applications with Spring but also includes support for *non-functional microservices capabilities* such as configuration management, service discovery, resiliency, load balancing, distributed logging, and so on. The main goal of Spring Cloud is to allow developers to quickly build microservices along with common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
 
-Spring Cloud is a framework for building microservces application with Spring. Spring Cloud includes support for configuration management, service discovery, resiliency, load balancing and other features. The main goal of Spring Cloud is to allow developers to quickly build microservices based on common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
+A frequently asked question is _“how does Quarkus with OpenShift handle the Spring Cloud capabilities?”_ In this lab, you will learn how efficiently Quarkus with OpenShift allows developers to integrate non-functional microservices capabilities into Kubernetes resources in *Kubernetes Native way*. 
 
-A frequently asked question is how does Spring Cloud relate to Quarkus & OpenShift? Quarkus and OpenShift aim to make developing microservices easy. However, OpenShift addresses the problem from a slightly different perspective. OpenShift provides the infrastructure for configuration management, service discovery and load balancing as part of the core platform. The application doesn’t need any library or agents for client side logic and it can be written in any language. OpenShift addresses the challenges of building microservices in a generic manner that is agnostic of the language.
+== Direct Access to OpenShift ConfigMaps and Secrets
 
-Microservices Requirements
+Quarkus includes the kubernetes-config extension which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as a configuration source, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloudn Config^] and https://www.consul.io/[Consul^].
 
-[options="header"]
-|===
-| Feature | Spring Cloud | OpenShift & Quarkus
-| Configuration Management | Config Server, Consul | OpenShift ConfigMap and Secrets
-| Service Discovery | Netflix Eureka, Consul | OpenShift Services and Routes
-| Load Balancing | Netflix Ribbon | OpenShift Services
-| API Gateway | Netflix Zuul | OpenShift Services and Routes
-| Distributed Tracing | Spring Cloud Sleuth, Zipkin | OpenTracing, Jaeger
-| Metrics | Netflix Spectator | Microprofile Metrics
-| Centralized Logging | ELK Stack (LogStash) | EFK Stack (Fluentd)
-| Resilience & Faul Tolerance | Spring Cloud Circuit Breaker | Microprofile Fault Tolerance 
-| Auto Scaling & Self Healing | - | OpenShift Auto Scaling & Self Healing
-| Packaging & Deployment | Spring Boot | Quarkus, OpenShift Deployment Strategies
-| Job Management | Spring Batch | OpenShift Jobs and Scheduled Jobs
-|===
-Source: https://developers.redhat.com/blog/2016/12/09/spring-cloud-for-microservices-compared-to-kubernetes/[_Spring Cloud for Microservices Compared to Kubernetes_] by Bilgin Ibryam
+In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project/configmaps[Config Maps^] in Developer Console, then click on `Create Config Map`:
 
+image::create-configmap.png[configmap.png, 900]
 
-=== Reviewing Updated Petclinic Microservices Architecture
+Replace the existing `ConfigMap` resource with the following code in YMAL editor:
 
-In the essense of time, we will provide the remaining microservices for `visits-service` and `customers-service`.
+[source,yaml,role="copypaste"]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myconfigmap
+  namespace: user1-project
+data:
+  message.hello.quarkus: Kubernetes Native Java, Quarkus
+----
 
-image::microservices/microservices-architecture.png[]
+image::myconfigmap.png[configmap.png, 900]
 
-In this lab, you will deploy the microservices to OpenShift.
+Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project in CodeReady Workspaces Terminal:
 
+[source,sh,role="copypaste"]
+----
+mvn -q quarkus:add-extension -Dextensions="kubernetes-config" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
+----
 
-=== Log in to OpenShift
+This extension works by reading ConfigMaps and Secrets directly from the Kubernetes API server using the https://quarkus.io/guides/kubernetes-client[Kubernetes Client^]. The extension understands the following types of ConfigMaps and Secrets as input sources:
 
-In order to deploy the microservices into OpenShift, you have to login first.
+* ConfigMaps and Secrets that contain _literal data_
+* ConfigMaps and Secrets created from files named _application.properties_, _application.yaml_ or _application.yml_.
 
-. On the right-hand side of the screen, select the item: *Login to OpenShift*
-+
-image::microservices/login-to-openshift-select.png[]
+You should see in the output:
 
-. You should see a screen similar to the one below
-+
-image::microservices/login-to-openshift-prompts.png[]
+[source,console]
+----
+✅ Extension io.quarkus:quarkus-kubernetes-config has been installed
+----
 
-. In the new terminal windows enter your OpenTLC credentials:
-.. Username: *{{ USER_ID }}*
-.. Password: <your-opentlc-password>
-+
-[WARNING]
+Open `application.properties` file in `src/main/resources` of quarkus-petclinic-web-v2 project then append the following configuration:
+
+[source,shell,role="copypaste"]
+----
+%prod.quarkus.kubernetes-config.enabled=true
+%prod.quarkus.kubernetes-config.config-maps=myconfigmap
+----
+
+[NOTE]
 ====
-It is important that you use your OpenTLC password. This is the password that you used to log into OpenTLC. Do NOT use password `openshift`, instead use your OpenTLC password.
+The properties obtained from the ConfigMaps and Secrets have a higher priority than (i.e. they override) any properties of the same name that are found in _application.properties_ (or the YAML equivalents), but they have lower priority than properties set via Environment Variables or Java System Properties. Furthermore, when multiple ConfigMaps (or Secrets) are used, ConfigMaps (or Secrets) defined later in the list have a higher priority that ConfigMaps defined earlier in the list. Finally, when both ConfigMaps and Secrets are used, the latter always a higher priority than the former.
 ====
 
-. Once you are successfully logged in, you should see a screen similar to below:
-+
-image::microservices/login-to-openshift-success.png[]
+Open `WelcomeResource.java` class file in `src/main/java/org/acme/rest` of quarkus-petclinic-web-v2 project, and add the following code:
 
-. You can safely close this terminal window. Click the "X" in the corner.
-+
-image::microservices/login-to-openshift-close.png[]
+[source,java,role="copypaste"]
+----
+    @ConfigProperty(name = "message.hello.quarkus")
+    String message;
+----
 
-. Move back to your original terminal window.
+Also, don’t forget to add the import statement by adding the import statement for *WelcomeResource* near the top:
 
-. View the list of projects
-+
+[source,java,role="copypaste"]
+----
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+----
+
+Let's the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of quarkus-petclinic-web-v2 project, and replace the following code:
+
+[source,html,role="copypaste"]
+----
+<h2>Welcome, {message}</h2>
+----
+
+*Rebuild* and *redeploy* the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+
 [source,sh,role="copypaste"]
 ----
-oc projects
+mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
 ----
 
-. You will see the following output:
-+
+When the build completes, the app is deployed to OpenShift. Back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
+
+image::quarkus-welcome-configmap.png[configmap.png, 900]
+
+
+== Add Health Probe to Quarkus
+
+Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a true antifragile system.
+
+Quarkus application can utilize the *MicroProfile Health* specification through the _SmallRye Health_ extension to provide information about their state(_liveness_ and _readiness_) to external viewers which is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
+
+When you deployed the the remaining microservices(_Visits_, _Customers_, _Web_), the `/health `endpoint in each microservice is automatically exposed directly that can be used to run the health check procedures. For example, the *customers* service is still running, so you can exercise the default (no-op) health check with this command in a separate Terminal:
+
+[source,sh,role="copypaste copypaste"]
 ----
-You have access to the following projects and can switch between them with 'oc project <projectname>':
-
-  * quarkus-abcabc-project - User project for {{ USER_ID }}
+curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/health | jq
 ----
 
-=== Deploying vets-service
+The output shows:
 
-In this section, you will deploy the `vets-service` to OpenShift. The service will make use of a Postgres database. Here is the application architecture.
+[source,json]
+----
+{
+  "status": "UP",
+  "checks": [
+    {
+      "name": "Database connections health check",
+      "status": "UP"
+    }
+  ]
+}
+----
 
-image::microservices/vets-service-architecture.png[width="300"]
+The general _outcome_ of the health check is computed as a logical AND of all the declared health check procedures. Quarkus extensions can also provide default health checks out of the box, which is why you see the `Database connections health check` above, since we are using a database extension.
 
-==== View source code
+Let’s fill in the class by creating a new RESTful endpoint which will be used by OpenShift to probe our services. Open empty `OwnersHealthCheck.java` class file in `src/main/java/org/acme/rest` of _quarkus-petclinic-customers-service_ project, and add the following code:
 
-. View the files for the `vet-service` application.
-+
-image::microservices/vets-service-files.png[]
+[source,java,role="copypaste"]
+----
+package org.acme.rest;
 
-. In your terminal window move to the directory for the `vets-service`:
-+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+import org.acme.service.OwnersService;
+import org.eclipse.microprofile.health.HealthCheck;
+import org.eclipse.microprofile.health.HealthCheckResponse;
+import org.eclipse.microprofile.health.Readiness;
+
+@Readiness
+@ApplicationScoped
+public class OwnersHealthCheck implements HealthCheck {
+
+    @Inject
+    OwnersService ownersService;
+
+    @Override
+    public HealthCheckResponse call() {
+
+        if (ownersService.findAll() != null) {
+            return HealthCheckResponse.named("Success of Owners Health Check!!!").up().build();
+        } else {
+            return HealthCheckResponse.named("Failure of Owners Health Check!!!").down().build();
+        }
+    }
+}
+----
+
+The `call()` method exposes an HTTP GET endpoint which will return the status of the service. The logic of this check does a simple query to the underlying database to ensure the connection to it is stable and available. The method is also annotated with MicroProfile's `@Readiness` annotation, which directs Quarkus to expose this endpoint as a health check at `/health/ready`.
+
+*Rebuild* and *redeploy* the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+
 [source,sh,role="copypaste"]
 ----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-customers-service
 ----
 
-==== Deploy Postgres Database
+When the build completes, the app is deployed to OpenShift. Access the health endpoint again using _curl_ and the result looks like:
 
-. Deploy a Postgres database in OpenShift for the `vets-service`:
-+
-[source,sh,role="copypaste"]
+[source,sh,role="copypaste copypaste"]
 ----
-oc new-app openshift/postgresql:latest \
-            --name=vets-database  \
-            -e POSTGRESQL_USER=vets \
-            -e POSTGRESQL_PASSWORD=mysecretpassword \
-            -e POSTGRESQL_DATABASE=vets \
-            --labels='app.kubernetes.io/part-of=vets-app,app.kubernetes.io/instance=vets-database,app.openshift.io/runtime=postgresql'
+curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/health | jq
 ----
 
-. This creates a Postgres DB based on the image: `openshift/postgresql:latest`. The application has the name `vets-database`.
+The result should be:
 
-. The database also has the following configurations.
-+
-[options="header"]
-|===
-| Configuration | Description
-| POSTGRESQL_USER| User name for the PostgreSQL account to be created.
-| POSTGRESQL_PASSWORD | Password for the user account
-| POSTGRESQL_DATABASE | Database name
-|===
-
-. You will see the following output from this command.
-+
-----
---> Found image 4ed79d1 (4 weeks old) in image stream "openshift/postgresql" under tag "latest" for "openshift/postgresql:latest"
-
-    PostgreSQL 12 
-    ------------- 
-    PostgreSQL is an advanced Object-Relational database management system (DBMS). The image contains the client and server programs that you'll need to create, run, maintain and access a PostgreSQL DBMS server.
-
-    Tags: database, postgresql, postgresql12, rh-postgresql12
-
-
---> Creating resources ...
-    imagestreamtag.image.openshift.io "vets-database:latest" created
-    deployment.apps "vets-database" created
-    service "vets-database" created
---> Success
-    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
-     'oc expose svc/vets-database' 
-    Run 'oc status' to view your app.
-----
-
-.  You can monitor the creation of the PostgreSQL pod.
-+
-[source,sh,role="copypaste"]
-----
-oc get pods 
-----
-
-. You will the following output.
-+
-----
-NAME                            READY   STATUS    RESTARTS   AGE
-vets-database-cf8d6895b-rtwhd   1/1     Running   0          14m
-----
-
-* Once the Postgres database pod is running and ready, we have a running database. We will access the Postgres database in later steps.
-
-===== View Quarkus Profile configuration
-. Open the file: `src/main/resources/application.properties`
-
-. Make note of the following entries.
-+
-----
-%prod.quarkus.datasource.url=jdbc:postgresql://vets-database:5432/vets
-%prod.quarkus.datasource.driver=org.postgresql.Driver
-%prod.quarkus.datasource.username=vets
-%prod.quarkus.datasource.password=mysecretpassword
-%prod.quarkus.datasource.max-size=8
-%prod.quarkus.datasource.min-size=2
-%prod.quarkus.hibernate-orm.database.generation=drop-and-create
-%prod.quarkus.hibernate-orm.sql-load-script=import.sql
-%prod.quarkus.hibernate-orm.log.sql=true
-----
-
-* The application will use Quarkus Profiles to make use of Production database configurations. Notice that the entries refer to the Postgres database that we deployed to OpenShift.
-
-* The deployed application is executed using `java -jar <final-jar-filename>`. When the app is run in this fashion, the app will use the production profile. The production profile is the default when not running in development or test mode.
-
-==== Deploy Quarkus app
-
-Quarkus offers the ability to automatically generate OpenShift resources based on default and user supplied configuration. The Quarkus OpenShift extension provides sensible defaults so that it’s easier for the user to get started with Quarkus on OpenShift.
-
-. In the `vets-service` project, open the `pom.xml` file. 
-
-. Make note of this existing entry:
-+
-----
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-openshift</artifactId>
-    </dependency>
-----
-
-* By adding this dependency, we now have the ability to configure the OpenShift resource generation and application using the usual `application.properties` approach that Quarkus provides. 
-
-. Open the file: `src/main/resources/application.properties`
-
-. Make note of the following entries:
-+
-----
-#
-# Quarkus OpenShift Extension - configuration settings 
-#
-
-# Automatically expose the route
-quarkus.openshift.expose=true
-
-# Trust a self signed certificate if so presented by the API server
-quarkus.kubernetes-client.trust-certs=true
-----
-
-* These properties allow you to customize deployment of the application. See the documentation for https://quarkus.io/guides/deploying-to-kubernetes#openshift[additional configuration options].
-
-
-. Deploy the application with the following command.
-+
-[source,sh,role="copypaste"]
-----
-mvn clean package -Dquarkus.kubernetes.deploy=true
-----
-
-. This command accomplishes the following tasks:
-* Builds a jar file locally
-* Creates a build configuration, which itself creates a new application image from your source code. 
-* Creates a deployment configuration to deploy the new image
-* Creates a service to provide load-balanced access to the deployment running your image.
-* Applies the generated OpenShift resources.
-
-** The deployment config is conigured to automatically trigger a redeployment when a change in the ImageStream is noticed.
-
-** In other words, any container image build after the initial deployment will automatically trigger redeployment, without the need to delete, update or re-apply the generated resources
-
-. You will see the following output.
-+
-----
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] --------------< org.acme:vets-service >---------------
-[INFO] Building vets-service 1.0.0-SNAPSHOT
-[INFO] --------------------------------[ jar ]---------------------------------
-...
-...
-INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ServiceAccount vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-11.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: DeploymentConfig vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Route vets-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] The deployed application can be accessed at: http://vets-service-quarkus-lmhzb-project.apps.cluster-twbr9.twbr9.sandbox1759.opentlc.com
-[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 68487ms
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:13 min
-[INFO] Finished at: 2020-10-24T15:17:55Z
-[INFO] ------------------------------------------------------------------------
-----
- 
-==== Verify Deployment
-
-The Quarkus OpenShift extension generates the appropriate OpenShift resources. Let's view these resources.
-
-. View the generated OpenShift resource for imagestreams.
-+
-[source,sh,role="copypaste"]
-----
-oc get imagestream vets-service
-----
-
-. View the buildconfig
-+
-[source,sh,role="copypaste"]
-----
-oc get buildconfig vets-service
-----
-
-. View the deploymentconfig
-+
-[source,sh,role="copypaste"]
-----
-oc get deploymentconfig vets-service
-----
-
-. View the pod for the `vets-service`
-+
-[source,sh,role="copypaste"]
-----
-oc get pods | grep vets-service
-----
-
-. You should see the following output.
-+
-----
-vets-service-1-build             0/1     Completed   0          21m
-vets-service-1-deploy            0/1     Completed   0          20m
-vets-service-1-mlxnz             1/1     Running     0          20m
-----
-* Based on this you can see that the `vets-service` is up and running.
-
-. Run the curl command to view a list of vets (json):
-+
-[source,sh,role="copypaste"]
-----
-curl http://$(oc get route vets-service -o jsonpath='{.spec.host}')/vets
-----
-
-. You will see the following output:
-+
-----
-[{"id":1,"firstName":"James","lastName":"Carter","specialties":[]},{"id":2,"firstName":"Helen","lastName":"Leary","specialties":[{"id":1,"name":"radiology"}]},{"id":3,"firstName":"Linda","lastName":"Douglas","specialties":[{"id":2,"name":"surgery"},{"id":3,"name":"dentistry"}]},{"id":4,"firstName":"Rafael","lastName":"Ortega","specialties":[{"id":2,"name":"surgery"}]},{"id":5,"firstName":"Henry","lastName":"Stevens","specialties":[{"id":1,"name":"radiology"}]},{"id":6,"firstName":"Sharon","lastName":"Jenkins","specialties":[]}]
-----
-
-. Display the web URL for the Swagger UI
-+
-[source,sh,role="copypaste"]
-----
-echo http://$(oc get route vets-service -o jsonpath='{.spec.host}')/swagger-ui
-----
-
-. Open a new web browser window and visit the web URL from above.
-+
-image::microservices/vets-service-swagger-ui.png[]
-
-==== Viewing the database
-
-When the application was deployed, the `import.sql` file was executed to load the database with initial data. Let's view the Postgres database.
-
-. Retrieve the name of the database pod.
-+
-[source,sh,role="copypaste"]
-----
-VETS_DATABASE_POD=$(oc get pods | grep "vets-database" | grep "Running" | awk '{print $1}')
-----
-. You can log into the running Postgres container using the following command:
-+
-[source,sh,role="copypaste"]
-----
-oc rsh $VETS_DATABASE_POD
-----
-
-. Once logged in, connect to the Postgres database.
-+
-[source,sh,role="copypaste"]
-----
-psql -U $POSTGRESQL_USER $POSTGRESQL_DATABASE
-----
-
-. Use the following command to execute an SQL statement to show some content from the database:
-+
-[source,sh,role="copypaste"]
-----
-select * from vets;
-----
-
-. You should see the following:
-+
-----
- id | first_name | last_name 
-----+------------+-----------
-  1 | James      | Carter
-  2 | Helen      | Leary
-  3 | Linda      | Douglas
-  4 | Rafael     | Ortega
-  5 | Henry      | Stevens
-  6 | Sharon     | Jenkins
-(6 rows)
-----
-
-. View the specialties
-+
-[source,sh,role="copypaste"]
-----
-select * from specialties;
-----
-
-. You should see the following:
-+
-----
- id |   name    
-----+-----------
-  1 | radiology
-  2 | surgery
-  3 | dentistry
-----
-
-. View the join table for vet_specialties
-+
-[source,sh,role="copypaste"]
-----
-select * from vet_specialties;
-----
-
-. You should see the following:
-+
-----
- id | specialty_id | vet_id 
-----+--------------+--------
-  1 |            1 |      2
-  2 |            2 |      3
-  3 |            3 |      3
-  4 |            2 |      4
-  5 |            1 |      5
-(5 rows)
-----
-
-. Exit the database with the following commands.
-+
-[source,sh,role="copypaste"]
-----
-\q
-exit
-----
-
-=== Deploying visits-service
-
-The `visits-service` is responsible for the management of pet visits. The `visits-service` has the following architecture.
-
-image::microservices/visits-service-architecture.png[width="300"]
-
-. View the files for the `visits-service` application.
-+
-image::microservices/visits-service-files.png[]
-
-. In your terminal window move to the directory for the `visits-service`:
-+
-[source,sh,role="copypaste"]
-----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-visits-service
-----
-
-==== Deploy Postgres Database
-
-. Deploy a Postgres database in OpenShift for the `visits-service`:
-+
-[source,sh,role="copypaste"]
-----
-oc new-app -e POSTGRESQL_USER=visits \
-    -e POSTGRESQL_PASSWORD=mysecretpassword \
-    -e POSTGRESQL_DATABASE=visits openshift/postgresql:latest \
-    --name=visits-database \
-    --labels='app.kubernetes.io/part-of=visits-app,app.kubernetes.io/instance=visits-database,app.openshift.io/runtime=postgresql'
-----
-
-. This creates a Postgres DB based on the image: `openshift/postgresql:latest`. The application has the name `visits-database`.
-
-.  You can monitor the creation of the PostgreSQL pod.
-+
-[source,sh,role="copypaste"]
+[source,json]
 ----
-oc get pods | grep visits
+{
+  "status": "UP",
+  "checks": [
+    {
+      "name": "Database connections health check",
+      "status": "UP"
+    },
+    {
+      "name": "Success of Owners Health Check!!!",
+      "status": "UP"
+    }
+  ]
+}
 ----
-
-. You will see the following output.
-+
-----
-NAME                            READY   STATUS    RESTARTS   AGE
-visits-database-7df7dbb97b-szkql   1/1     Running   0          6s
-----
-
-* Once the Postgres database pod is running and ready, we have a running database. 
-
-==== Deploy Quarkus app
-
-We will follow a similar process for deploying the visits service. Again, we'll use the Quarkus OpenShift extension.
-
-. Deploy the Quarkus application.
-+
-[source,sh,role="copypaste"]
-----
-mvn clean package -Dquarkus.kubernetes.deploy=true
-----
-
-. You will see the following output.
-+
-----
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] ----------------------< org.acme:visits-service >-----------------------
-[INFO] Building visits-service 1.0.0-SNAPSHOT
-[INFO] --------------------------------[ jar ]---------------------------------
-...
-...
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Deploying to openshift server: https://172.30.0.1:443/ in namespace: quarkus-lmhzb-project.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ServiceAccount visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-11.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: DeploymentConfig visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Route visits-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] The deployed application can be accessed at: http://visits-service-quarkus-lmhzb-project.apps.cluster-twbr9.twbr9.sandbox1759.opentlc.com
-[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 62653ms
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:09 min
-[INFO] Finished at: 2020-10-24T17:01:10Z
-[INFO] ------------------------------------------------------------------------
-----
-
-==== Verify Deployment
-
-. View the pod for the `visits-service`.
-+
-[source,sh,role="copypaste"]
-----
-oc get pods -w | grep visits-service
-----
-
-. Sample output
-+
-----
-visits-service-1-build             0/1     Completed   0          89s
-visits-service-1-deploy            0/1     Completed   0          47s
-visits-service-1-mlxnz             1/1     Running     0          45s
-----
-
-. Run the curl command to view a list of visits (json):
-+
-[source,sh,role="copypaste"]
-----
-curl http://$(oc get route visits-service -o jsonpath='{.spec.host}')/pets/visits?petIds=8
-----
-
-. You will see the following output:
-+
-----
-[{"id":2,"petId":8,"date":[2013,1,2],"description":"rabies shot"},{"id":3,"petId":8,"date":[2013,1,3],"description":"neutered"}]
-----
-
-. Display the web URL for the Swagger UI
-+
-[source,sh,role="copypaste"]
-----
-echo http://$(oc get route visits-service -o jsonpath='{.spec.host}')/swagger-ui
-----
-
-. Open a web browser and visit the web URL from above.
-+
-image::microservices/visits-service-swagger-ui.png[]
-
-=== Deploying customers-service
-
-The `customers-service` is responsible for the management of owners and pets. The `customers-service` has the following architecture.
-
-image::microservices/customers-service-architecture.png[width="300"]
-
-. View the files for the `customers-service` application.
-+
-image::microservices/customers-service-files.png[]
-
-. In your terminal window, move to the directory for the `customers-service`:
-+
-[source,sh,role="copypaste"]
-----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-customers-service
-----
-
-==== Deploy Postgres Database
-
-. Deploy a Postgres database in OpenShift for the `customers-service`:
-+
-[source,sh,role="copypaste"]
-----
-oc new-app -e POSTGRESQL_USER=customers \
-    -e POSTGRESQL_PASSWORD=mysecretpassword \
-    -e POSTGRESQL_DATABASE=customers openshift/postgresql:latest \
-    --name=customers-database \
-    --labels='app.kubernetes.io/part-of=customers-app,app.kubernetes.io/instance=customers-database,app.openshift.io/runtime=postgresql'
-----
-
-. This creates a Postgres DB based on the image: `openshift/postgresql:latest`. The application has the name `customers-database`.
-
-.  You can monitor the creation of the PostgreSQL pod.
-+
-[source,sh,role="copypaste"]
-----
-oc get pods | grep customers
-----
-
-. You will the following output.
-+
-----
-NAME                            READY   STATUS    RESTARTS   AGE
-customers-database-7df7dbb97b-szkql   1/1     Running   0          6s
-----
-
-* Once the Postgres database pod is running and ready, we have a running database. 
-
-==== Deploy Quarkus app
-
-We will follow a similar process for deploying the `customers-service`. Again, we'll use the Quarkus OpenShift extension.
-
-. Deploy the Quarkus application.
-+
-[source,sh,role="copypaste"]
-----
-mvn clean package -Dquarkus.kubernetes.deploy=true
-----
-
-. You will see the following output.
-+
-----
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] ----------------------< org.acme:customers-service >-----------------------
-[INFO] Building customers-service 1.0.0-SNAPSHOT
-[INFO] --------------------------------[ jar ]---------------------------------
-...
-...
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Deploying to openshift server: https://172.30.0.1:443/ in namespace: quarkus-lmhzb-project.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ServiceAccount customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-11.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: DeploymentConfig customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Route customers-service.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] The deployed application can be accessed at: http://customers-service-quarkus-lmhzb-project.apps.cluster-twbr9.twbr9.sandbox1759.opentlc.com
-[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 62653ms
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:09 min
-[INFO] Finished at: 2020-10-24T17:01:10Z
-[INFO] ------------------------------------------------------------------------
-----
-
-==== Verify Deployment
-
-. View the pod for the `customers-service`
-+
-[source,sh,role="copypaste"]
-----
-oc get pods -w | grep customers-service
-----
-
-. Sample output
-+
-----
-customers-service-1-build             0/1     Completed   0          89s
-customers-service-1-deploy            0/1     Completed   0          47s
-customers-service-1-mlxnz             1/1     Running     0          45s
-----
-
-. Run the curl command to view a list of owners (json):
-+
-[source,sh,role="copypaste"]
-----
-curl http://$(oc get route customers-service -o jsonpath='{.spec.host}')/owners
-----
-
-. You will see the following output:
-+
-----
-[{"id":1,"firstName":"George","lastName":"Franklin","address":"110 W. Liberty St.","city":"Madison","telephone":"6085551023","pets":[{"id":1,"name":"Leo","birthDate":"2010-09-07","type":{"id":1,"name":"cat"}}]},{"id":2,"firstName":"Betty","lastName":"Davis","address":"638 Cardinal Ave.","city":"Sun Prairie","telephone":"6085551749","pets":[{"id":2,"name":"Basil","birthDate":"2012-08-06","type":{"id":6,"name":"hamster"}}]},{"id":3,"firstName":"Eduardo","lastName":"Rodriquez","address":"2693 Commerce St.","city":"McFarland","telephone":"6085558763","pets":[{"id":3,"name":"Rosy","birthDate":"2011-04-17","type":{"id":2,"name":"dog"}},{"id":4,"name":"Jewel","birthDate":"2010-03-07","type":{"id":2,"name":"dog"}}]},{"id":4,"firstName":"Harold","lastName":"Davis","address":"563 Friendly St.","city":"Windsor","telephone":"6085553198","pets":[{"id":5,"name":"Iggy","birthDate":"2010-11-30","type":{"id":3,"name":"lizard"}}]},{"id":5,"firstName":"Peter","lastName":"McTavish","address":"2387 S. Fair Way","city":"Madison","telephone":"6085552765","pets":[{"id":6,"name":"George","birthDate":"2010-01-20","type":{"id":4,"name":"snake"}}]},{"id":6,"firstName":"Jean","lastName":"Coleman","address":"105 N. Lake St.","city":"Monona","telephone":"6085552654","pets":[{"id":7,"name":"Samantha","birthDate":"2012-09-04","type":{"id":1,"name":"cat"}},{"id":8,"name":"Max","birthDate":"2012-09-04","type":{"id":1,"name":"cat"}}]},{"id":7,"firstName":"Jeff","lastName":"Black","address":"1450 Oak Blvd.","city":"Monona","telephone":"6085555387","pets":[{"id":9,"name":"Lucky","birthDate":"2011-08-06","type":{"id":5,"name":"bird"}}]},{"id":8,"firstName":"Maria","lastName":"Escobito","address":"345 Maple St.","city":"Madison","telephone":"6085557683","pets":[{"id":10,"name":"Mulligan","birthDate":"2007-02-24","type":{"id":2,"name":"dog"}}]},{"id":9,"firstName":"David","lastName":"Schroeder","address":"2749 Blackhawk Trail","city":"Madison","telephone":"6085559435","pets":[{"id":11,"name":"Freddy","birthDate":"2010-03-09","type":{"id":5,"name":"bird"}}]},{"id":10,"firstName":"Carlos","lastName":"Estaban","address":"2335 Independence La.","city":"Waunakee","telephone":"6085555487","pets":[{"id":12,"name":"Lucky","birthDate":"2010-06-24","type":{"id":2,"name":"dog"}},{"id":13,"name":"Sly","birthDate":"2012-06-08","type":{"id":1,"name":"cat"}}]}]
-----
-
-. Display the web URL for the Swagger UI
-+
-[source,sh,role="copypaste"]
-----
-echo http://$(oc get route customers-service -o jsonpath='{.spec.host}')/swagger-ui
-----
-
-. Open a web browser and visit the web URL from above.
-+
-image::microservices/customers-service-swagger-ui.png[]
-
-
-=== Deploying petclinic-web-v2
-
-We are providing a refactored version of the web application. The code for this is in the directory `petclinic-web-v2`. This version of the web application will communicate with the microservices for `vets-service`, `visits-service` and `customers-service`. The application leverages the Microprofile REST client. This is similar to the coding that you developed in the previous lab. We are providing this code to accelerate the development process.
-
-This is the architecture of the `petclinic-web-v2` application.
-
-image::microservices/microservices-architecture.png[]
-
-==== View source files
-
-. View the files for the `petclinic-web-v2` application.
-+
-image::microservices/petclinic-web-v2-files.png[]
-
-. In your terminal window, move to the directory for the `petclinic-web-v2`:
-+
-[source,sh,role="copypaste"]
-----
-cd $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
-----
-
-==== Deploy Quarkus app
-
-We will follow a similar process for deploying the `petclinic-web-v2`. Again, we'll use the Quarkus OpenShift extension.
-
-. Deploy the Quarkus application.
-+
-[source,sh,role="copypaste"]
-----
-mvn clean package -Dquarkus.kubernetes.deploy=true
-----
-
-. You will see the following output
-+
-----
-[INFO] Scanning for projects...
-[INFO] 
-[INFO] -----------------< org.acme:petclinic-web-v2 >------------------
-[INFO] Building petclinic-web-v2 1.0.0-SNAPSHOT
-[INFO] --------------------------------[ jar ]---------------------------------
-...
-...
-INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ServiceAccount petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Service petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream openjdk-11.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: ImageStream petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: BuildConfig petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: DeploymentConfig petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] Applied: Route petclinic-web-v2.
-[INFO] [io.quarkus.kubernetes.deployment.KubernetesDeployer] The deployed application can be accessed at: http://petclinic-web-v2-quarkus-lmhzb-project.apps.cluster-twbr9.twbr9.sandbox1759.opentlc.com
-[INFO] [io.quarkus.deployment.QuarkusAugmentor] Quarkus augmentation completed in 65530ms
-[INFO] ------------------------------------------------------------------------
-[INFO] BUILD SUCCESS
-[INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:33 min
-[INFO] Finished at: 2020-10-24T21:30:30Z
-[INFO] ------------------------------------------------------------------------
-----
-
-==== Verify Deployment
-
-. View the pod for the `petclinic-web-v2`
-+
-[source,sh,role="copypaste"]
-----
-oc get pods -w | grep petclinic-web-v2
-----
-
-. Sample output
-+
-----
-petclinic-web-v2-1-8dsmf      1/1     Running     0          2m27s
-petclinic-web-v2-1-build      0/1     Completed   0          3m18s
-petclinic-web-v2-1-deploy     0/1     Completed   0          2m29s
-----
-
-. Display the web URL for the Pet Clinic v2 web application
-+
-[source,sh,role="copypaste"]
-----
-echo http://$(oc get route petclinic-web-v2 -o jsonpath='{.spec.host}')
-----
-
-. Open a web browser and visit the web URL from above.
-+
-image:
-
-. Click the link for *Vets*.
-+
-image::microservices/vets-navigation-link.png[]
-
-. You should see the following output.
-+
-image::microservices/vets-list.png[]
-* This list of vets is retrieved from the `vets-service`.
-
-. Click the link for *Find Owners*.
-. Click the button for *Find Owner*.
-
-. You should see the following output.
-+
-image::microservices/petclinic-web-owners-list.png[]
-* The list of owners is retrieved from the `customers-service`.
-
-. Select the owner *Jean Coleman* from the list
-
-. You should see the following output
-+
-image::microservices/owners-detail-view.png[]
-
-=== Viewing Application Topology in OpenShift Developer Perspective.
-
-The Topology view in the Developer perspective of the web console provides a visual representation of all the applications within a project, their build status, and the components and services associated with them.
-
-. Display the URL for the OpenShift web console.
-+
-[source,sh,role="copypaste"]
-----
-oc whoami --show-console
-----
-
-. Open a web browser and visit the URL from the step above.
-
-. At the OpenShift login screen, enter your OpenTLC credentials
-.. Username: *{{ USER_ID }}*
-.. Password: <your-opentlc-password>
 
-. Select your OpenShift project.
+You now see the default health check, along with your new customer(owner) health check.
 
-. Select the *Developer* perspective
-+
-image::microservices/navigate-to-developer-console.png[]
+[NOTE]
+====
+You can define separate readiness and liveness probes using `@Liveness` and `@Readiness` annotations and access them separately at `/health/live` and `/health/ready`.
+====
 
-. Select the *Topology* view 
-+
-image::microservices/topology-view.png[]
+Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^]. Click on `DC(customers-service)` then select `Edit Health Checks` in *Actions* dropbox:
 
-. Make note of how the application components are grouped together. This grouping is configured with the OpenShift label: `app.kubernetes.io/part-of=<appname>`
+image::customers-dc.png[health.png, 900]
 
-. Make note of how the applications components are connected. This connection is configured with the OpenShift annotation: `app.openshift.io/connects-to`
+You should see `Readiness Probe` and `Liveness Probe` are already added along with Quarkus MicroProfile health specification:
 
-. These configurations are defined in the `application.properties` file for the respective microservices.
+image::health-probe.png[health.png, 900]
 
+Click on `Edit Probe` in _Readniess Probe_ then you should see the way to check if the container is ready to handle requests. A failed readiness probe means that a container should not receive any traffic from a proxy, even if it's running:
 
-Congratulations. You have successfully deployed a Quarkus Microservices application to OpenShift!
+image::readiness-probe.png[health.png, 900]
 
+== Congratulations!
 
+You have successfully integrated non-functional microservices capabilities into Kubernetes/OpenShift resources in *Kubernetes Native way*.

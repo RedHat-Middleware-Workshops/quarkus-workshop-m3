@@ -12,4 +12,4 @@ modules:
   springstrangle:
     name: Strangling the Spring Monolith with Quarkus
   springcloud:
-    name: Spring Cloud to Quarkus on OpenShift
+    name: Spring to Kubernetes Native with Quarkus
