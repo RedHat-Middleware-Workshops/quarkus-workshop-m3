@@ -60,7 +60,7 @@ Spring Petclinic application also supports 3 types of database such as *H2*, *HS
 
 image::spring-db-structure.png[quarkus, 400]
 
-In this lab, we'll learn how simply refactor *Spring Data JPA* to *Quarkus Hibernate ORM with Panache*. Because _Hibernate ORM_ is the de facto JPA implementation and offers you the full breadth of an Object Relational Mapper. It makes complex mappings possible, but it does not make simple and common mappings trivial. _Hibernate ORM with Panache_ focuses on making your entities trivial and fun to write in _Quarkus_.
+In this lab, we'll learn how simply refactor *Spring Data JPA* to *Quarkus Hibernate ORM with Panache*. _Hibernate ORM_ is the de facto JPA implementation and offers you the full breadth of an Object Relational Mapper. It makes complex mappings possible, but it does not make simple and common mappings trivial. _Hibernate ORM with Panache_ focuses on making your entities trivial and fun to write in _Quarkus_.
 
 When it comes to writing *Hibernate ORM* entities, there are a number of annoying things that users have grown used to reluctantly deal with, such as:
 
@@ -78,6 +78,11 @@ With *Panache*, we took an opinionated approach to tackle all these problems:
 * Don’t write parts of the query that you don’t need. For exampe, write *Person.find("order by name")* or *Person.find("name = ?1 and status = ?2", "stef", Status.Alive)* or even better *Person.find("name", "stef")*.
 
 That’s all there is to it: with Panache, Hibernate ORM has never looked so trim and neat.
+
+[NOTE]
+====
+If you really still prefer the repository pattern, Quarkus supports that as well. Take a look at the https://quarkus.io/guides/hibernate-orm-panache#solution-2-using-the-repository-pattern[Quarkus Documentation^] for more information on how to use this pattern in Hibernate ORM with Panache.
+====
 
 == Setting up and configuring Hibernate ORM with Panache
 
