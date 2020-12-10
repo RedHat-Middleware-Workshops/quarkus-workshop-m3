@@ -13,7 +13,7 @@ In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONS
 
 image::create-configmap.png[configmap.png, 900]
 
-Replace the existing `ConfigMap` resource with the following code in YMAL editor:
+Replace the existing `ConfigMap` resource with the following code in YAML editor:
 
 [source,yaml,role="copypaste"]
 ----
