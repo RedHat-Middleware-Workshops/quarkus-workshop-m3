@@ -89,7 +89,7 @@ Let's go back to the *welcome page* in Spring Petclinic application. It provides
 
 image::spring-petclinic-views.gif[spring, 900]
 
-we'll start with a very simple template to create the welcome page. Open an empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the src/main/resources/templates directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
+We'll start with a very simple template to create the welcome page. Open an empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the `src/main/resources/templates` directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
 
 Copy the below code into the file:
 
@@ -107,8 +107,8 @@ Copy the below code into the file:
 {#include footer/} // <2>
 ----
 
-<1> Include a template with id header to specify menu navigation. See more details in _src/main/resources/templates/header.html_.
-<2> Include a template with id footer to refer common Javascripts and a common logo image. See more details in _src/main/resources/templates/footer.html_.
+<1> Include a template with id header to specify menu navigation. See more details in `src/main/resources/templates/header.html`.
+<2> Include a template with id footer to refer common Javascripts and a common logo image. See more details in `src/main/resources/templates/footer.html`.
 
 Now let’s inject the *compiled* welcome template in the resource class. Open an empty `WelcomeResource.java` class file in `src/main/java/org/acme/rest`, and add the following code under the `// TODO: Inject template` comment:
 
