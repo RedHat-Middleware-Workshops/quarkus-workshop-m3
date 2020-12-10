@@ -133,7 +133,7 @@ Add the following code under the `// TODO: Add TemplateInstance` comment:
     }
 ----
 
-Delete the exiting default landing page(`index.html`) to render a new welcome page in `src/main/resources/META-INF/resources`:
+Delete the existing default landing page(`index.html`) to render a new welcome page in `src/main/resources/META-INF/resources`:
 
 image::delete-index.png[quarkus-logo, 700]
 
@@ -267,13 +267,13 @@ public class OwnersResource {
                     .data("owners", id);
     }
 
-    // TODO: Add to search an exiting owner by last name
+    // TODO: Add to search an existing owner by last name
 
     // TODO: Add to Post transaction for adding a new owner
 
-    // TODO: Add to retrieve an exiting owner
+    // TODO: Add to retrieve an existing owner
 
-    // TODO: Add to Post transaction for editing an exiting owner
+    // TODO: Add to Post transaction for editing an existing owner
 
 }
 ----
