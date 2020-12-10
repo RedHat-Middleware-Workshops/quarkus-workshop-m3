@@ -118,9 +118,9 @@ The output looks like:
 
 Now that you have a new microservice developed for the *vets service*, you'll strangle the existing Petclinic monolith to use the vets service.
 
-The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the *MicroProfile Rest Client* which is similar to *Spring Cloud Feign*. 
+The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the *MicroProfile REST Client* which is similar to *Spring Cloud Feign*. 
 
-The MicroProfile Rest Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
+The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
 Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady Workspaces Terminal:
 
@@ -137,10 +137,10 @@ You should see in the output:
 ✅ Extension io.quarkus:quarkus-rest-client has been installed
 ----
 
-* *quarkus-rest-client* provides a Quarkus wrapper for the Microprofile Rest Client implementation
+* *quarkus-rest-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
 * *quarkus-resteasy-jackson* handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
 
-Let's develop a MicroProfile Rest Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
+Let's develop a MicroProfile REST Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
 
 image::quarkus-petclinic-vetsclient.png[quarkus, 600]
 
