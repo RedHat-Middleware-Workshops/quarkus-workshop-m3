@@ -431,7 +431,7 @@ Append the following variables in `src/main/resources/application.properties`:
 <5> Instructs the extension to generate an OpenShift `Route`.
 <6> Adds a nice-looking icon to the app when viewing the OpenShift Developer Toplogy
 
-Build and deploy the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+Build and deploy the `people` application via running the following maven plugin in CodeReady Workspaces Terminal:
 
 [source,sh,role="copypaste"]
 ----
