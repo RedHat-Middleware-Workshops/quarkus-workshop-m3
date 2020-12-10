@@ -603,7 +603,7 @@ Update the `OwnersResource.java` class to invoke *findById(id)* service. `Replac
     }
 ----
 
-Add the following code under the `// TODO: Add to search an exiting owner by last name` comment:
+Add the following code under the `// TODO: Add to search an existing owner by last name` comment:
 
 [source,java,role="copypaste"]
 ----
@@ -618,7 +618,7 @@ Add the following code under the `// TODO: Add to search an exiting owner by las
     }
 ----
 
-Add the following code under the `// TODO: Add to retrieve an exiting owner` comment:
+Add the following code under the `// TODO: Add to retrieve an existing owner` comment:
 
 [source,java,role="copypaste"]
 ----
@@ -844,7 +844,7 @@ Edit the `OwnersResource.java` class to refactor the owner persistence layer. Ad
 <3> @MultipartForm defines the parameter as a value object for incoming/outgoing request/responses of the multipart/form-data mime type.
 <4> Make sure to wrap methods modifying your database (e.g. newOwner.persist()) within a transaction.
 
-Add the following code under the `// TODO: Add to Post transaction for editing an exiting owner` comment:
+Add the following code under the `// TODO: Add to Post transaction for editing an existing owner` comment:
 
 [source,java,role="copypaste"]
 ----
@@ -1132,9 +1132,9 @@ public class PetsResource {
 <1> Inject OwnersService CDI bean to find a related owner
 <2> Inject PetsService CDI bean to find an existing pet by ID
 <3> Inject a Qute Template 
-<4> Retrieve the exiting Pet information related to a certain owner
+<4> Retrieve the existing Pet information related to a certain owner
 <5> Add a new Pet information
-<6> Edit an exiting Pet information
+<6> Edit an existing Pet information
 
 Open an empty `PetForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
 
