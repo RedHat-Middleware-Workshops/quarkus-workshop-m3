@@ -1,13 +1,13 @@
 = Spring to Kubernetes Native with Quarkus
 :experimental:
 
-*Spring Cloud* is a framework for building microservices applications with Spring but also includes support for *non-functional microservices capabilities* such as configuration management, service discovery, resiliency, load balancing, distributed logging, and so on. The main goal of Spring Cloud is to allow developers to quickly build microservices along with common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
+https://spring.io/projects/spring-cloud[*Spring Cloud*^] is a framework for building microservice applications with Spring but also includes support for *non-functional microservices capabilities* such as configuration management, service discovery, resiliency, load balancing, distributed logging, and so on. The main goal of Spring Cloud is to allow developers to quickly build microservices along with common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
 
 A frequently asked question is *how does Quarkus with OpenShift handle the Spring Cloud capabilities?* In this lab, you will learn how efficiently Quarkus with OpenShift allows developers to integrate non-functional microservices capabilities into Kubernetes resources in *Kubernetes Native way*. 
 
 == Direct Access to OpenShift ConfigMaps and Secrets
 
-Quarkus includes the kubernetes-config extension which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as a configuration source, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloud Config^] and https://www.consul.io/[Consul^].
+Quarkus includes the https://quarkus.io/guides/kubernetes-config[kubernetes-config^] extension, which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as configuration sources, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloud Config^] and https://www.consul.io/[Consul^].
 
 In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project/configmaps[Config Maps^] in Developer Console, then click on `Create Config Map`:
 
@@ -68,7 +68,7 @@ Open `WelcomeResource.java` class file in `src/main/java/org/acme/rest` of *quar
     String message;
 ----
 
-Then replace `get()` method with the following codes:
+Then replace `get()` method with the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -87,7 +87,7 @@ Also, don’t forget to add the import statement by adding the import statement 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 ----
 
-Let's the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of *quarkus-petclinic-web-v2* project, and replace the following code:
+Let's modify the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of *quarkus-petclinic-web-v2* project, and replace the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -101,7 +101,14 @@ Let's the Qute template to show the message that refers to OpenShift ConfigMap. 
 mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
 ----
 
-When the build and deployment complete, the app is deployed to OpenShift. Back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
+When the build and deployment complete, the app will be rolled out to OpenShift. You can watch it until it completes by running the following in the CodeReady Workspaces Terminal:
+
+[source,sh,role="copypaste"]
+----
+oc rollout status -w dc/petclinic-web-v2
+----
+
+Once the rollout is complete, back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
 
 image::quarkus-welcome-configmap.png[configmap.png, 900]
 
@@ -109,9 +116,9 @@ image::quarkus-welcome-configmap.png[configmap.png, 900]
 
 Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a resilient system.
 
-Quarkus application can utilize the *MicroProfile Health* specification through the _SmallRye Health_ extension to provide information about their state(_liveness_ and _readiness_) to external viewers which is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
+Quarkus applications can utilize the https://download.eclipse.org/microprofile/microprofile-health-2.2/microprofile-health-spec.html[*MicroProfile Health*^] specification through the https://quarkus.io/guides/microprofile-health[_SmallRye Health_ extension^] to provide information about their state (_liveness_ and _readiness_) to external viewers. This is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
 
-When you deployed the the remaining microservices(_Visits_, _Customers_, _Web_), the `/health` endpoint in each microservice is automatically exposed directly that can be used to run the health check procedures. For example, the *customers* service is still running, so you can exercise the default (no-op) health check with this command in a separate Terminal:
+When you deployed the the remaining microservices (_Visits_, _Customers_, _Web_), the `/health` endpoint in each microservice is automatically exposed that can be used to run the health check procedures. For example, the *customers* service is still running, so you can exercise the default (no-op) health check with this command in a separate Terminal:
 
 [source,sh,role="copypaste copypaste"]
 ----
@@ -174,7 +181,7 @@ The `call()` method exposes an HTTP GET endpoint which will return the status of
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-customers-service
+mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
 ----
 
 When the build completes, the app is deployed to OpenShift. Access the health endpoint again using _curl_ and the result looks like:
@@ -203,7 +210,7 @@ The result should be:
 }
 ----
 
-You now see the default health check, along with your new customer(owner) health check.
+You now see the default health check, along with your new customer (owner) health check.
 
 [NOTE]
 ====
