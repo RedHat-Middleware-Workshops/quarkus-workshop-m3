@@ -118,7 +118,7 @@ The output looks like:
 
 Now that you have a new microservice developed for the *vets service*, you'll strangle the existing Petclinic monolith to use the vets service.
 
-The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the *MicroProfile REST Client* which is similar to *Spring Cloud Feign*. 
+The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the https://microprofile.io/project/eclipse/microprofile-rest-client[*MicroProfile REST Client*] which is similar to *Spring Cloud Feign*. 
 
 The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
