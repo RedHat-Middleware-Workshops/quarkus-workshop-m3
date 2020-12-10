@@ -438,8 +438,6 @@ Build and deploy the `people` application via running the following maven plugin
 mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
 
-As you recall, the output of this process is a native Linux binary but also running Source-To-Image(S2I) build processor.
-
 **Wait for it to finish!**. You should get a **BUILD SUCCESS** message at the end. Once that's done, make sure it's actually done rolling out:
 
 [source,sh,role="copypaste"]
