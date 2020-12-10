@@ -311,7 +311,7 @@ Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINAR
 
 image::quarkus-vets-data.png[spring-schema.png, 900]
 
-*Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essense of time, We will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
+*Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essence of time, We will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
 
 image::remain-microservices.png[quarkus, 600]
 
