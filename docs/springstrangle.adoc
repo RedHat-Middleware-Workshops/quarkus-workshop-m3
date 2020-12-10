@@ -1,13 +1,13 @@
 = Strangling the Spring Monolith with Quarkus
 :experimental:
 
-In the previous, labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack, and you got a glimpse into the efficiency of Quarkus for Spring developers.
+In the previous labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack. You also got a glimpse into the efficiency of Quarkus for Spring developers.
 
 You will now begin the process of https://martinfowler.com/bliki/StranglerFigApplication.html[strangling the monolith^] by breaking the application into multiple microservices based on different functionalities, with the eventual goal of re-architecting the entire application as a set of distributed microservices. Later on, we’ll explore how you can better manage the application in a cloud-native way after it is re-architected.
 
 == Goals of this lab
 
-The goal is to *strangle* monolith with *Quarkus* and deploy them to *OpenShift*. After this lab, you should end up with something like:
+The goal is to *strangle* the monolith with *Quarkus* and deploy them to *OpenShift*. After this lab, you should end up with something like:
 
 image::spring2quarkus-strangle-diagram.png[quarkus, 700]
 
@@ -118,7 +118,7 @@ The output looks like:
 
 Now that you have a new microservice developed for the *vets service*, you'll strangle the existing Petclinic monolith to use the vets service.
 
-The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the https://microprofile.io/project/eclipse/microprofile-rest-client[*MicroProfile REST Client*] which is similar to *Spring Cloud Feign*. 
+The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the https://microprofile.io/project/eclipse/microprofile-rest-client[MicroProfile REST Client^] which is similar to https://cloud.spring.io/spring-cloud-openfeign/reference/html[Spring Cloud Feign^]. 
 
 The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
@@ -140,7 +140,7 @@ You should see in the output:
 * *quarkus-rest-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
 * *quarkus-resteasy-jackson* handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
 
-Let's develop a MicroProfile REST Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
+Let's develop a MicroProfile REST Client for the vets service. Open `VetsRestClient.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
 
 image::quarkus-petclinic-vetsclient.png[quarkus, 600]
 
@@ -192,7 +192,7 @@ Open `application.properties` file in `src/main/resources` of *quarkus-petclinic
 It is important that `org.acme.client.VetsRestClient` must match the fully qualified name of the `VetsRestClient` interface we created in the previous section.
 ====
 
-Now you'll modify the existing _VetResource_ file to communicate with _VetsRestClient_ rather than the existing _VetsService_.
+Now you'll modify the existing _VetsResource_ file to communicate with _VetsRestClient_ rather than the existing _VetsService_.
 
 Open `VetsResource.java` class file in `src/main/java/org/acme/rest` of *quarkus-petclinic* project then add the following code under the `// TODO: Inject RestClient Bean` comment:
 
@@ -325,7 +325,7 @@ Once logged in, click on the name of your project (`{{ USER_ID }}-project`):
 
 image::ocpproj.png[project,700]
 
-Switch to the _Developer Perspective_ using the upper-left drop-down:
+Switch to the _Developer Perspective_ (if not already on it) using the upper-left drop-down:
 
 image::devperspective.png[perspective, 700]
 
@@ -399,7 +399,7 @@ For your convenience, we've already added _quarkus-openshift_ extension to vets-
 
 image::vets-pom.png[vets-pom.png, 700]
 
-Append the following variables in `src/main/resources/application.properties`:
+Append the following variables in `src/main/resources/application.properties` within the `quarkus-petclinic-vets-service` project:
 
 [source,shell,role="copypaste"]
 ----
