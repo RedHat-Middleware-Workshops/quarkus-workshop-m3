@@ -107,7 +107,7 @@ image::quarkus-welcome-configmap.png[configmap.png, 900]
 
 == Add Health Probe to Quarkus
 
-Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a true antifragile system.
+Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a resilient system.
 
 Quarkus application can utilize the *MicroProfile Health* specification through the _SmallRye Health_ extension to provide information about their state(_liveness_ and _readiness_) to external viewers which is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
 
