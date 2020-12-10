@@ -319,7 +319,7 @@ image::quarkus-spring-vets-data.png[spring-schema.png, 900]
 
 *Great job!* Let's refactor the other business layers using Hibernate ORM with Panache and CDI extensions.
 
-== Refactor Owers, Pets and Visits Persistence Layer
+== Refactor Owners, Pets and Visits Persistence Layer
 
 Let's go back to the *welcome page* in Spring Petclinic application. In `FIND OWNERS` menu, we can have 3 different user expirences to search owners as below:
 
