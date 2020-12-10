@@ -7,13 +7,13 @@ A frequently asked question is *how does Quarkus with OpenShift handle the Sprin
 
 == Direct Access to OpenShift ConfigMaps and Secrets
 
-Quarkus includes the kubernetes-config extension which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as a configuration source, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloudn Config^] and https://www.consul.io/[Consul^].
+Quarkus includes the kubernetes-config extension which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as a configuration source, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloud Config^] and https://www.consul.io/[Consul^].
 
 In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project/configmaps[Config Maps^] in Developer Console, then click on `Create Config Map`:
 
 image::create-configmap.png[configmap.png, 900]
 
-Replace the existing `ConfigMap` resource with the following code in YMAL editor:
+Replace the existing `ConfigMap` resource with the following code in YAML editor:
 
 [source,yaml,role="copypaste"]
 ----
@@ -107,7 +107,7 @@ image::quarkus-welcome-configmap.png[configmap.png, 900]
 
 == Add Health Probe to Quarkus
 
-Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a true antifragile system.
+Spring Cloud has in-application libraries for creating resilient, fault-tolerant microservices using https://github.com/Netflix/Hystrix[Hystrix^] (with bulkhead and circuit breaker patterns) and https://github.com/Netflix/ribbon[Ribbon^] (for load balancing). But that alone is not enough, and when it is combined with Kubernetes health checks, process restarts and auto-scaling capabilities turn microservices into a resilient system.
 
 Quarkus application can utilize the *MicroProfile Health* specification through the _SmallRye Health_ extension to provide information about their state(_liveness_ and _readiness_) to external viewers which is typically useful in cloud environments where automated processes must be able to determine whether the application should be discarded or restarted.
 
