@@ -118,9 +118,9 @@ The output looks like:
 
 Now that you have a new microservice developed for the *vets service*, you'll strangle the existing Petclinic monolith to use the vets service.
 
-The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the *MicroProfile Rest Client* which is similar to *Spring Cloud Feign*. 
+The monlith web application will need to make _HTTP_ calls to the the vets service. You could make the calls manually, but this approach requires a lot of boiler-plate code and it is error prone. As an alternative, you will use the https://microprofile.io/project/eclipse/microprofile-rest-client[*MicroProfile REST Client*] which is similar to *Spring Cloud Feign*. 
 
-The MicroProfile Rest Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
+The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
 Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady Workspaces Terminal:
 
@@ -137,10 +137,10 @@ You should see in the output:
 ✅ Extension io.quarkus:quarkus-rest-client has been installed
 ----
 
-* *quarkus-rest-client* provides a Quarkus wrapper for the Microprofile Rest Client implementation
+* *quarkus-rest-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
 * *quarkus-resteasy-jackson* handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
 
-Let's develop a MicroProfile Rest Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
+Let's develop a MicroProfile REST Client for the vets service. Open `VetsResource.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
 
 image::quarkus-petclinic-vetsclient.png[quarkus, 600]
 
@@ -311,7 +311,7 @@ Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINAR
 
 image::quarkus-vets-data.png[spring-schema.png, 900]
 
-*Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essense of time, We will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
+*Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essence of time, we will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
 
 image::remain-microservices.png[quarkus, 600]
 
@@ -431,14 +431,12 @@ Append the following variables in `src/main/resources/application.properties`:
 <5> Instructs the extension to generate an OpenShift `Route`.
 <6> Adds a nice-looking icon to the app when viewing the OpenShift Developer Toplogy
 
-Build and deploy the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+Build and deploy the `people` application via running the following maven plugin in CodeReady Workspaces Terminal:
 
 [source,sh,role="copypaste"]
 ----
 mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
-
-As you recall, the output of this process is a native Linux binary but also running Source-To-Image(S2I) build processor.
 
 **Wait for it to finish!**. You should get a **BUILD SUCCESS** message at the end. Once that's done, make sure it's actually done rolling out:
 
