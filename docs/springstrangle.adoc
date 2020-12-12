@@ -11,7 +11,7 @@ The goal is to *strangle* the monolith with *Quarkus* and deploy them to *OpenSh
 
 image::spring2quarkus-strangle-diagram.png[quarkus, 700]
 
-* *Vets Service* manages the data for retrieving a list of vets and their associated specialites.
+* *Vets Service* manages the data for retrieving a list of vets and their associated specialties.
 * *Visits Service* manages the data to perform CRUD operations for pet visits.
 * *Customers Service* manages the data for owners and pets. It is a composition of the original modules for owners and pets because it would be easier to handle the database tight-relationships between owners and pets.
 
