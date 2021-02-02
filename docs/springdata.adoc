@@ -570,9 +570,9 @@ public class OwnersService {
 }
 ----
 
-<1> Simplify your query conditions such as *Like* and *Sort*.
-<2> Static method to list all data by default so you don't need to implement a full query like _@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")_ in Spring Petclinic application.
-<3> Static method to search by ID by default so you don't need to implement a full query like _@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")_ in Spring Petclinic application.
+* Simplify your query conditions such as *Like* and *Sort*.
+* Static method to list all data by default so you don't need to implement a full query like _@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")_ in Spring Petclinic application.
+* Static method to search by ID by default so you don't need to implement a full query like _@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")_ in Spring Petclinic application.
 
 Edit the `OwnersResource.java` class to inject the OwnersService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
 
@@ -833,7 +833,7 @@ Edit the `OwnersResource.java` class to refactor the owner persistence layer. Ad
 
         Owner newOwner = ownerForm.addOwner();
         newOwner.persist(); // <4>
-        return Response.status(301)
+        return Response.status(Status.MOVED_PERMANENTLY)
                     .location(URI.create("/owners?id=" + newOwner.getId()))
                     .build();
     }
@@ -856,7 +856,7 @@ Add the following code under the `// TODO: Add to Post transaction for editing a
 
         Owner existingOwner = service.findById(ownerId);
         existingOwner = ownerForm.editOwner(existingOwner);
-        return Response.status(301)
+        return Response.status(Status.MOVED_PERMANENTLY)
                     .location(URI.create("/owners?id=" + ownerId))
                     .build();
     }
@@ -1106,7 +1106,7 @@ public class PetsResource {
         newPet.setOwner(ownerService.findById(ownerId));
         newPet.setPetType(PetType.findByName(petForm.type));
         newPet.persist();
-        return Response.status(301)
+        return Response.status(Status.MOVED_PERMANENTLY)
                     .location(URI.create("/owners?id=" + ownerId))
                     .build();
     }
@@ -1121,7 +1121,7 @@ public class PetsResource {
         existingPet = petForm.editPet(existingPet);
         existingPet.setOwner(ownerService.findById(ownerId));
         existingPet.setPetType(PetType.findByName(petForm.type));
-        return Response.status(301)
+        return Response.status(Status.MOVED_PERMANENTLY)
             .location(URI.create("/owners?id=" + ownerId))
             .build();
     }
@@ -1279,7 +1279,7 @@ public class VisitsResource {
         Visit newVisit = visitForm.addVisit();
         newVisit.setPet(petService.findById(petId));
         newVisit.persist();
-        return Response.status(301)
+        return Response.status(Status.MOVED_PERMANENTLY)
                     .location(URI.create("/owners?id=" + ownerId))
                     .build();
     }
