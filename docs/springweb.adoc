@@ -73,7 +73,7 @@ Click on the URL link at the upper right to open the same default page in a sepa
 
 image::crw-open-page.png[page, 800]
 
-`Leave this page` because you will develop new logical views and implemented the use cases like the Spring Petclinic application in the next labs.
+`leave this page/tab open` because you will develop new logical views and implemented the use cases like the Spring Petclinic application in the next labs.
 
 == Create Qute Templates to refactor Spring Web
 

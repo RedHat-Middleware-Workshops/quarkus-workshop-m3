@@ -150,4 +150,4 @@ Click on the URL link at the upper right to open the same default page in a sepa
 
 image::crw-open-spring-page.png[page, 800]
 
-`Leave this page` because you will go through logical views and implemented the use cases of Spring Petclinic application in the next labs.
+`leave this page/tab open` because you will go through logical views and implemented the use cases of Spring Petclinic application in the next labs.
