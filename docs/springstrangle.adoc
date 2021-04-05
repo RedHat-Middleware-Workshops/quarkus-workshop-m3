@@ -1,5 +1,6 @@
 = Strangling the Spring Monolith with Quarkus
 :experimental:
+:imagesdir: images
 
 In the previous labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack. You also got a glimpse into the efficiency of Quarkus for Spring developers.
 

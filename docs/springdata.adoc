@@ -1,5 +1,6 @@
 = Spring Data JPA to Quarkus Hibernate ORM with Panache
 :experimental:
+:imagesdir: images
 
 *Spring Data JPA* enables Java developers to implement JPA-based repositories but also quickly to build applications with data access technology. Implementing the data access layer of an application has been a hassle for quite some time. To perform simple queries, pagination and auditing, you need to write boilerplate code. Spring Data JPA aims to improve the implementation of the data access layer by creating repository interfaces and custom finder methods. 
 

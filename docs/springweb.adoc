@@ -1,5 +1,6 @@
 = Spring Web to Quarkus Qute
 :experimental:
+:imagesdir: images
 
 *Qute* is a templating engine designed specifically to meet the Quarkus needs. The usage of reflection is minimized to reduce the size of native images. The API combines both the imperative and non-blocking reactive style of coding. In the development mode, all files located in *src/main/resources/templates* are watched for changes and modifications are immediately visible.
 

@@ -1,5 +1,6 @@
 = Spring to Kubernetes Native with Quarkus
 :experimental:
+:imagesdir: images
 
 https://spring.io/projects/spring-cloud[*Spring Cloud*^] is a framework for building microservice applications with Spring but also includes support for *non-functional microservices capabilities* such as configuration management, service discovery, resiliency, load balancing, distributed logging, and so on. The main goal of Spring Cloud is to allow developers to quickly build microservices along with common cloud development patterns. Spring Cloud accomplishes this by providing a rich collection of Java APIs and services for microservices development.
 

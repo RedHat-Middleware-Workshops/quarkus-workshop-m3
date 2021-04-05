@@ -1,5 +1,6 @@
 = Spring DI to Quarkus CDI
 :experimental:
+:imagesdir: images
 
 Spring framework provides a *Dependency Injection(DI)* container that enables you to inject required objects into other objects. Dependency injection is a pattern to implement IoC(Inversion of Control), where the control being inverted is the setting of the object's dependencies with the following advantages:
 
