@@ -123,7 +123,7 @@ When you deployed the the remaining microservices (_Visits_, _Customers_, _Web_)
 
 [source,sh,role="copypaste copypaste"]
 ----
-curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/health | jq
+curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/q/health | jq
 ----
 
 The output shows:
@@ -189,7 +189,7 @@ When the build completes, the app is deployed to OpenShift. Access the health en
 
 [source,sh,role="copypaste copypaste"]
 ----
-curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/health | jq
+curl $(oc get route customers-service -o=go-template --template={% raw %}'{{ .spec.host }}'{% endraw %})/q/health | jq
 ----
 
 The result should be:
