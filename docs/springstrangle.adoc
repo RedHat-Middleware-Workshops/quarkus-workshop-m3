@@ -353,17 +353,16 @@ Click *Create*.
 
 == Login to OpenShift
 
-Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Click on **Login to OpenShift**, and enter your given credentials:
-
-* Username: **`{{ USER_ID }}`**
-* Password: **`{{ OPENSHIFT_USER_PASSWORD }}`**
+Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Click on *Login to OpenShift*:
 
 image::cmd-login.png[login,700]
 
-[WARNING]
+[NOTE]
 ====
-Use the username and password you were assigned by the instructor.
+When you click on this, CodeReady Workspaces executes the following command:
+*oc login https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true --username={{ USER_ID }} --password={{ OPENSHIFT_USER_PASSWORD }}*
 ====
+
 
 You should see:
 
