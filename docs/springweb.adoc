@@ -32,10 +32,10 @@ Open a new terminal in CodeReady Workspaces then run the following `mvn` (Maven)
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:dev -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
 
-Leave this terminal window open throughout the lab! You will complete the entire lab without shutting down Quarkus Live Coding mode, so be careful not to close the tab (if you do, you re-run it). This is very useful for quick expermentation.
+Leave this terminal window open throughout the lab! You will complete the entire lab without shutting down Quarkus Live Coding mode, so be careful not to close the tab (if you do, you re-run it). This is very useful for quick experimentation.
 
 [NOTE]
 ====

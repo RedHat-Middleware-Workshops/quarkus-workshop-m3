@@ -72,7 +72,7 @@ Open a new CodeReady Workspaces Terminal and run the following commands to run t
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:dev -Ddebug=7005 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=7005 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
 
 [NOTE]
@@ -312,6 +312,11 @@ Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINAR
 
 image::quarkus-vets-data.png[spring-schema.png, 900]
 
+[NOTE]
+====
+You might have an error(_Unsatisfied dependency for type org.acme.client.VetsRestClient and qualifiers_) when you reload _VETERINARIAN_ page. In the case, you need to restart Quarkus Dev Mode in the _Quarkus Petclinic_ project.
+====
+
 *Congratulations!* You successfully retrieved a list of vets from the _Vets_ microservice. You also took the first major step of strangling the monolith application. In the essence of time, we will provide the remaining microservices(_Visits_, _Customers_, _Web_) for you:
 
 image::remain-microservices.png[quarkus, 600]
@@ -403,8 +408,9 @@ Append the following variables in `src/main/resources/application.properties` wi
 
 [source,shell,role="copypaste"]
 ----
-%prod.quarkus.datasource.url=jdbc:postgresql://vets-database:5432/vets
-%prod.quarkus.datasource.driver=org.postgresql.Driver
+%prod.quarkus.datasource.db-kind=postgresql
+%prod.quarkus.datasource.jdbc.url=jdbc:postgresql://vets-database:5432/vets
+%prod.quarkus.datasource.jdbc.driver=org.postgresql.Driver
 %prod.quarkus.datasource.username=vets
 %prod.quarkus.datasource.password=mysecretpassword
 %prod.quarkus.datasource.max-size=8
@@ -414,22 +420,26 @@ Append the following variables in `src/main/resources/application.properties` wi
 %prod.quarkus.hibernate-orm.log.sql=true
 
 %prod.quarkus.kubernetes-client.trust-certs=true<1>
-%prod.quarkus.container-image.build=true<2>
-%prod.quarkus.kubernetes.deploy=true<3>
-%prod.quarkus.kubernetes.deployment-target=openshift<4>
+%prod.quarkus.kubernetes.deploy=true<2>
+%prod.quarkus.kubernetes.deployment-target=openshift<3>
+%prod.quarkus.openshift.build-strategy=docker<4>
 %prod.quarkus.openshift.expose=true<5>
-%prod.quarkus.openshift.labels.app.openshift.io/runtime=quarkus<6>
 %prod.quarkus.openshift.part-of=vets-app
 %prod.quarkus.openshift.component=rest-api
 %prod.quarkus.openshift.annotations."app.openshift.io/connects-to"=vets-database
 ----
 
+%prod.quarkus.kubernetes-client.trust-certs=true
+%prod.quarkus.kubernetes.deploy=true
+%prod.quarkus.kubernetes.deployment-target=openshift
+%prod.quarkus.openshift.build-strategy=docker
+%prod.quarkus.openshift.expose=true
+
 <1> We are using self-signed certs in this simple example, so this simply says to the extension to trust them.
-<2> Instructs the extension to build a container image
-<3> Instructs the extension to deploy to OpenShift after the container image is built
-<4> Instructs the extension to generate and create the OpenShift resources (like `DeploymentConfig` and `Service`) after building the container
-<5> Instructs the extension to generate an OpenShift `Route`.
-<6> Adds a nice-looking icon to the app when viewing the OpenShift Developer Toplogy
+<2> Instructs the extension to deploy to OpenShift after the container image is built
+<3> Instructs the extension to generate and create the OpenShift resources (like `DeploymentConfig` and `Service`) after building the container
+<4> Set the Docker build strategy
+<5> Instructs the extension to generate an OpenShift `Route`
 
 Build and deploy the `people` application via running the following maven plugin in CodeReady Workspaces Terminal:
 
