@@ -429,12 +429,6 @@ Append the following variables in `src/main/resources/application.properties` wi
 %prod.quarkus.openshift.annotations."app.openshift.io/connects-to"=vets-database
 ----
 
-%prod.quarkus.kubernetes-client.trust-certs=true
-%prod.quarkus.kubernetes.deploy=true
-%prod.quarkus.kubernetes.deployment-target=openshift
-%prod.quarkus.openshift.build-strategy=docker
-%prod.quarkus.openshift.expose=true
-
 <1> We are using self-signed certs in this simple example, so this simply says to the extension to trust them.
 <2> Instructs the extension to deploy to OpenShift after the container image is built
 <3> Instructs the extension to generate and create the OpenShift resources (like `DeploymentConfig` and `Service`) after building the container
