@@ -34,7 +34,7 @@ To leverage a new service by the existing Quarkus petclinic application, the vet
 | GET | /vets | Retrieves a list of vets and their associated specialties
 |===
 
-Developing REST APIs with Quarkus is similar with using Spring Boot. Quarkus uses JAX-RS from the Microprofile specifications. Here's a comparison of common annotations used for REST development in Sprinboot and Quarkus:
+Developing REST APIs with Quarkus is similar with using Spring Boot. Quarkus uses JAX-RS from the Microprofile specifications. Here's a comparison of common annotations used for REST development in Spring Boot and Quarkus:
 
 [options="header"]
 |===
