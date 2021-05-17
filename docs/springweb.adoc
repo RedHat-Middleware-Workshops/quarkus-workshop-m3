@@ -90,7 +90,7 @@ Let's go back to the *welcome page* in Spring Petclinic application. It provides
 
 image::spring-petclinic-views.gif[spring, 900]
 
-We'll start with a very simple template to create the welcome page. Open an empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the `src/main/resources/templates` directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
+We'll start with a very simple template to create the welcome page. Open the empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the `src/main/resources/templates` directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
 
 Copy the below code into the file:
 
@@ -111,7 +111,7 @@ Copy the below code into the file:
 <1> Include a template with id header to specify menu navigation. See more details in `src/main/resources/templates/header.html`.
 <2> Include a template with id footer to refer common Javascripts and a common logo image. See more details in `src/main/resources/templates/footer.html`.
 
-Now let’s inject the *compiled* welcome template in the resource class. Open an empty `WelcomeResource.java` class file in `src/main/java/org/acme/rest`, and add the following code under the `// TODO: Inject template` comment:
+Now let’s inject the *compiled* welcome template in the resource class. Open the empty `WelcomeResource.java` class file in `src/main/java/org/acme/rest`, and add the following code under the `// TODO: Inject template` comment:
 
 [source,java,role="copypaste"]
 ----
@@ -166,7 +166,7 @@ Create an owners template to refactor *Find Owners* presentaion layer as you see
 
 image::spring-find-owners.png[quarkus-petclinic, 900]
 
-Open an empty `owners.html` in `src/main/resources/templates`, and add the following code:
+Open the empty `owners.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -220,7 +220,7 @@ Quarkus Qute Templating Engine can't be integrated with the https://www.thymelea
 image::quarkus-static-contents.png[quarkus-petclinic, 700]
 ====
 
-Open an empty `OwnersResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
+Open the empty `OwnersResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -289,7 +289,7 @@ image::quarkus-petclinic-owners.png[quarkus-petclinic, 900]
 Don't try to search owners with the last name or add an owner yet. We'll refactor the functions using _Quarkus CDI_ and _Hibernate ORM with Panache_ in the next labs.
 ====
 
-Great job! Let's finish refactoring 2 more top menu pages. Open an empty `vets.html` in `src/main/resources/templates`, and add the following code:
+Great job! Let's finish refactoring 2 more top menu pages. Open the empty `vets.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -314,7 +314,7 @@ Great job! Let's finish refactoring 2 more top menu pages. Open an empty `vets.h
 {#include footer/}
 ----
 
-Open an empty `VetsResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
+Open the empty `VetsResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -356,7 +356,7 @@ Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINAR
 
 image::quarkus-petclinic-vets.png[quarkus-petclinic, 900]
 
-Open an empty `oups.html` in `src/main/resources/templates`, and add the following code:
+Open the empty `oups.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -373,7 +373,7 @@ Open an empty `oups.html` in `src/main/resources/templates`, and add the followi
 
 <1> {message} is a value expression that is evaluated when the template is rendered.
 
-Open an empty `OupsResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
+Open the empty `OupsResource.java` class file in `src/main/java/org/acme/rest`, and add the following code:
 
 [source,java,role="copypaste"]
 ----

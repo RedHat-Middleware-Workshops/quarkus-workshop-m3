@@ -223,7 +223,7 @@ import javax.validation.constraints.NotEmpty;
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 ----
 
-Create a new entity, _Specialty_. Open an empty `Specialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Create a new entity, _Specialty_. Open the empty `Specialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -249,7 +249,7 @@ public class Specialty extends PanacheEntity {
 }
 ----
 
-Edit the presentation layer to show the actual data. Open the `vets.html` in `src/main/resources/templates`, and add the following code under the `<!-- TODO: Add a for loop to list specialty -->`:
+Edit the presentation layer to show the actual data. Open the `vets.html` in `src/main/resources/templates`, and add the following code under the `<!-- TODO: Add a for loop to list specialty pass:[-->]`:
 
 [source,html,role="copypaste"]
 ----
@@ -260,7 +260,7 @@ Edit the presentation layer to show the actual data. Open the `vets.html` in `sr
 
 Don't forget to remove the dummy code, `none` in the HTML.
 
-Create a relation entity between _Specialty_ and _Vet_. Open an empty `VetSpecialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Create a relation entity between _Specialty_ and _Vet_. Open the empty `VetSpecialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -335,7 +335,7 @@ These use cases are implemented by multiple _Entity_, _Controller_, and _Reposit
 
 image::spring-owners-structure.png[spring-schema.png, 400]
 
-Now, we'll refactor an *Owner* entity to implement the above use cases. Open an empty `Owner.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Now, we'll refactor an *Owner* entity to implement the above use cases. Open the empty `Owner.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -398,7 +398,7 @@ public class Owner extends PanacheEntityBase { // <1>
 <1> Specify your own ID strategy by extending *PanacheEntityBase* instead of *PanacheEntity*. 
 <2> Declare whatever ID you want as a public field.
 
-Refactor an *Pet* entity to implement the above use cases. Open an empty `Pet.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Refactor an *Pet* entity to implement the above use cases. Open the empty `Pet.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -476,7 +476,7 @@ public class Pet extends PanacheEntityBase {
 <1> *ManyToOne* annotation is associated with the _Owner_ class variable.
 <2> *OneToMany* annotation is used to define the property in _Visit_ class that will be used to map the mappedBy variable. 
 
-Refactor an *PetType* entity to implement the above use cases. Open an empty `PetType.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Refactor an *PetType* entity to implement the above use cases. Open the empty `PetType.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -500,7 +500,7 @@ public class PetType extends PanacheEntity {
 }
 ----
 
-Refactor an *Visit* entity to implement the above use cases. Open an empty `Visit.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Refactor an *Visit* entity to implement the above use cases. Open the empty `Visit.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -542,7 +542,7 @@ public class Visit extends PanacheEntity {
 }
 ----
 
-Create a CDI bean to retrieve the _Owner_ object. Open an empty `OwnersService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+Create a CDI bean to retrieve the _Owner_ object. Open the empty `OwnersService.java` class file in `src/main/java/org/acme/service`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -559,22 +559,21 @@ public class OwnersService {
     public List<Owner> findByLastName(String lastName) {
         if (lastName != null && !lastName.isEmpty()) {
             return Owner.find("LOWER(lastName) LIKE LOWER(?1) ", 
-                Sort.by("firstName"), "%" + lastName + "%").list();
+                Sort.by("firstName"), "%" + lastName + "%").list(); #<.> <.>
         } else {
             return Owner.listAll(); 
         }
     }
 
     public Owner findById(Long id) { 
-        return Owner.findById(id.longValue());
+        return Owner.findById(id.longValue()); #<.>
     }
 
 }
 ----
-
-* Simplify your query conditions such as *Like* and *Sort*.
-* Static method to list all data by default so you don't need to implement a full query like _@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")_ in Spring Petclinic application.
-* Static method to search by ID by default so you don't need to implement a full query like _@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")_ in Spring Petclinic application.
+<.> Simplify your query conditions such as *Like* and *Sort*.
+<.> Static method to list all data by default so you don't need to implement a full query like _@Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.lastName LIKE :lastName%")_ in Spring Petclinic application.
+<.> Static method to search by ID by default so you don't need to implement a full query like _@Query("SELECT owner FROM Owner owner left join fetch owner.pets WHERE owner.id =:id")_ in Spring Petclinic application.
 
 Edit the `OwnersResource.java` class to inject the OwnersService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
 
@@ -636,12 +635,14 @@ Add the following code under the `// TODO: Add to retrieve an existing owner` co
 
 Also, don’t forget to add the import statement by un-commenting the import statement for *OwnersResource* near the top:
 
+TIP: As in VSCode, you can quickly toggle the comment status of a selected block of text by using the kbd:[CTRL+/] (or kbd:[CMD+/] on a Mac) keystroke
+
 [source,java]
 ----
 import org.acme.service.OwnersService;
 ----
 
-Next, we'll refactor the presentation layer to show listAll, findByLastName, and detail view. Open an empty `ownersList.html` in `src/main/resources/templates`, and add the following code:
+Next, we'll refactor the presentation layer to show listAll, findByLastName, and detail view. Open the empty `ownersList.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -673,7 +674,7 @@ Next, we'll refactor the presentation layer to show listAll, findByLastName, and
 </table>
 ----
 
-Open an empty `ownerDetails.html` in `src/main/resources/templates`, and add the following code:
+Open the empty `ownerDetails.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -875,7 +876,7 @@ import org.acme.model.OwnerForm;
 
 RESTEasy has rich support for the _multipart/_ and _multipart/form-data_ mime types. The multipart mime format is used to pass lists of content bodies. Multiple content bodies are embedded in one message. We'll also use this `multipart/form-data` in the Quarkus Petclinic application. *@FormParam* allows you to inject individual form parameters from the request body into method parameter values.
 
-Open an empty `OwnerForm.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Open the empty `OwnerForm.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -913,7 +914,7 @@ public class OwnerForm {
 }
 ----
 
-Next, we'll refactor the presentation layer to edit or add an owner. Open an empty `editOwner.html` in `src/main/resources/templates`, and add the following code:
+Next, we'll refactor the presentation layer to edit or add an owner. Open the empty `editOwner.html` in `src/main/resources/templates`, and add the following code:
 
 [source,html,role="copypaste"]
 ----
@@ -988,7 +989,7 @@ Next, we'll refactor the presentation layer to edit or add an owner. Open an emp
 
 <1> Use multipart/form-data mime types to pass lists of content bodies. 
 
-Lastly, we need to use the `update` policy for only updating the schema in the database. Open an `application.properties` in `src/main/resources/` then replace the following configuration:
+Lastly, we need to use the `update` policy for only updating the schema in the database. Open an `application.properties` in `src/main/resources/` then *replace* the following configuration:
 
 [source,properties,role="copypaste"]
 ----
@@ -1028,7 +1029,7 @@ When you click on `Find Owner` without *Last Name* in the FIND OWNERS menu, you 
 
 image::quarkus-new-owner-list.png[quarkus-petclinic.png, 900]
 
-Good job! We'll now refactor the Pet and Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Pet object. Open an empty `PetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+Good job! We'll now refactor the Pet and Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Pet object. Open the empty `PetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -1047,7 +1048,7 @@ public class PetsService {
 }
 ----
 
-Open an empty `PetsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
+Open the empty `PetsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -1139,7 +1140,7 @@ public class PetsResource {
 <5> Add a new Pet information
 <6> Edit an existing Pet information
 
-Open an empty `PetForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
+Open the empty `PetForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -1204,7 +1205,7 @@ Click on `Update Pet` then youu should see the updated pet(i.e. `Kitty`) in the 
 
 image::quarkus-edit-pet-result.png[quarkus-petclinic.png, 900]
 
-Lastly, We'll refactor the Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Visit object. Open an empty `VisitsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+Lastly, We'll refactor the Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Visit object. Open the empty `VisitsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -1223,7 +1224,7 @@ public class VisitsService {
 }
 ----
 
-Open an empty `VisitsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
+Open the empty `VisitsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -1291,7 +1292,7 @@ public class VisitsResource {
 }
 ----
 
-Open an empty `VisitForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
+Open the empty `VisitForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
 
 [source,java,role="copypaste"]
 ----
