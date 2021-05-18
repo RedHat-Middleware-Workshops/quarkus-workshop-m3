@@ -2,9 +2,6 @@
 id: quarkus-lab
 name: Quarkus for Spring Developers Hands-on Lab (Version 2021-04-23)
 
-# content:
-#   url: https://raw.githubusercontent.com/hatmarch/quarkus-workshop-m3/ocp-4.7
-
 vars:
   ROUTE_SUBDOMAIN:
   MASTER_URL:
