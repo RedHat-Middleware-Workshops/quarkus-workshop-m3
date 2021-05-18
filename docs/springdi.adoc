@@ -57,7 +57,7 @@ In this lab, we'll refactor the *Spring DI* to *Quarkus CDI* that is the basic p
 
 The first step is to define the model(POJO) bean for store Vet object. We'll add identical attributes to the _Vet_ java class in Spring Petclic.
 
-Open an empty `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code:
+Open the empty `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -108,7 +108,7 @@ public class Vet {
 We'll remove getter, setter, listAll methods when we refactor this _POJO_ bean class to _Entity_ bean class using Quarkus Hibernate with Panache in the next lab.
 ====
 
-Create a CDI bean to retrieve the _Vet_ object. Open an empty `VetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+Create a CDI bean to retrieve the _Vet_ object. Open the empty `VetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -162,7 +162,7 @@ Also, don’t forget to add the import statement by un-commenting the import sta
 import org.acme.service.VetsService;
 ----
  
-Edit the presentation layer to list dummy data(Vet). Open the `vets.html` in `src/main/resources/templates`, and add the following code under `<!-- TODO: Add a for loop to list vets -->` the comment:
+Edit the presentation layer to list dummy data(Vet). Open the `vets.html` in `src/main/resources/templates`, and add the following code under `<!-- TODO: Add a for loop to list vets pass:[-->]` the comment:
 
 [source,html,role="copypaste"]
 ----
