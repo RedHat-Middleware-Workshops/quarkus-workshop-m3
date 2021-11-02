@@ -88,7 +88,7 @@ Also, don’t forget to add the import statement by adding the import statement 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 ----
 
-Let's modify the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of *quarkus-petclinic-web-v2* project, and replace the following code:
+Let's modify the Qute template to show the message that refers to OpenShift ConfigMap. Open `welcome.html` file in `src/main/resources/templates` of *quarkus-petclinic-web-v2* project, and replace the `<h2>Welcome</h2>` line with the following line:
 
 [source,html,role="copypaste"]
 ----
