@@ -88,7 +88,7 @@ You can also find the _Installed features: [cdi, qute, resteasy-qute]_ in the ab
 
 Let's go back to the *welcome page* in Spring Petclinic application. It provides the top menus to display a list of all vets, find an owner, or view documentation. For example, when you click on Spring logo, the page will go back to the welcome page:
 
-image::spring-petclinic-views.gif[spring, 900]
+image::spring-petclinic-views.png[spring, 900]
 
 In the `quarkus-petclinic` project, We'll start with a very simple template to create the welcome page. Open the empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the `src/main/resources/templates` directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
 
