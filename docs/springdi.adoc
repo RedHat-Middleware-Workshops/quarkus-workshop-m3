@@ -2,20 +2,20 @@
 :experimental:
 :imagesdir: images
 
-Spring framework provides a *Dependency Injection(DI)* container that enables you to inject required objects into other objects. Dependency injection is a pattern to implement IoC(Inversion of Control), where the control being inverted is the setting of the object's dependencies with the following advantages:
+Spring framework provides a _Dependency Injection_ (DI) container that enables you to inject required objects into other objects. Dependency injection is a pattern to implement _Inversion of Control_ (IoC), where the control being inverted is the setting of the object's dependencies with the following advantages:
 
 * Decoupling the execution of a task from its implementation
 * Making it easier to switch between different implementations
 * Better modularity of a program
-* Easier in testing a program by isolating a component or mocking its dependencies
+* Easier in-testing a program by isolating a component or mocking its dependencies
 
 == Goals of this lab
 
-The goal is to refactor *Spring DI* application to *Quarkus CDI* for the Controller layers. After this lab, you should end up with something like:
+The goal is to refactor the *Spring DI* application controller to *Quarkus CDI* for the Controller layers. After this lab, you should end up with something like:
 
 image::spring2quarkus-cdi-diagram.png[quarkus, 900]
 
-Let’s take a look at how the Spring DI is implemented. Multiple Dependency Injections are already used in the Spring Petclinic application through constructors, setters or fields. For example, Open a `PetTypeFormatter.java` class file in `src/main/java/org/springframework/samples/petclinic/owner` then you shoud see:
+Let’s take a look at how the Spring DI is implemented. Multiple Dependency Injections are already used in the Spring Petclinic application through constructors, setters or fields. For example, Open the `PetTypeFormatter.java` class file in `src/main/java/org/springframework/samples/petclinic/owner` and you should see:
 
 [source,java]
 ----
@@ -51,11 +51,11 @@ public class PetTypeFormatter implements Formatter<PetType> {
 <1> *@Component* annotation indicates that this class(i.e. PetTypeFormatter) is a _component_ that is considered as candidates for auto-detection when using annotation-based configuration and classpath scanning.
 <2> *@Autowired* annotation is applied on a bean constructor to inject _PetRepository_ object. Autowiring Dependency allows the Spring container to automatically resolve dependencies between collaborating beans by inspecting the beans that have been defined.
 
-In this lab, we'll refactor the *Spring DI* to *Quarkus CDI* that is the basic principles of the Quarkus programming model that is based on ArC which is a CDI-based dependency injection solution tailored for Quarkus' architecture. If you’re new to CDI then we recommend you to read the https://quarkus.io/guides/cdi[Introduction to CDI^] guide. Quarkus only implements a subset of the CDI features and comes with non-standard features and specific APIS, you can learn more about it in the https://quarkus.io/guides/cdi-reference[Contexts and Dependency Injection guide^]. Besides, *ArC* comes as a dependency of _quarkus-resteasy_ so you already have it handy.
+In this lab, we'll refactor the usage of *Spring DI* to *Quarkus CDI*, which is the a core principle of the Quarkus programming model. This model is based on [ArC](https://quarkus.io/blog/quarkus-dependency-injection/), which is a CDI-based dependency injection solution tailored for Quarkus' architecture. If you’re new to CDI then we recommend you to read the https://quarkus.io/guides/cdi[Introduction to CDI^] guide. Quarkus only implements a subset of the CDI features and comes with non-standard features and specific APIS, you can learn more about it in the https://quarkus.io/guides/cdi-reference[Contexts and Dependency Injection guide^]. Besides, *ArC* comes as a dependency of _quarkus-resteasy_ so you already have it handy.
 
 == Add CDI Injection to Vets
 
-The first step is to define the model(POJO) bean for store Vet object. We'll add identical attributes to the _Vet_ java class in Spring Petclic.
+The first step is to define the model bean (a simple POJO) for the Vet type. We'll add identical attributes taken from the _Vet_ java class in the Spring Petclinic application.
 
 Open the empty `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code:
 

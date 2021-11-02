@@ -2,7 +2,7 @@
 :experimental:
 :imagesdir: images
 
-In the previous labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack. You also got a glimpse into the efficiency of Quarkus for Spring developers.
+In the previous labs you learned how to refactor an existing monolithic Spring Boot Petclinic application to the Quarkus stack. You also had a glimpse into the efficiency of Quarkus for Spring developers.
 
 You will now begin the process of https://martinfowler.com/bliki/StranglerFigApplication.html[strangling the monolith^] by breaking the application into multiple microservices based on different functionalities, with the eventual goal of re-architecting the entire application as a set of distributed microservices. Later on, we’ll explore how you can better manage the application in a cloud-native way after it is re-architected.
 
@@ -72,7 +72,7 @@ Open a new CodeReady Workspaces Terminal and run the following commands to run t
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=7005 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
 ----
 
 [NOTE]
@@ -85,7 +85,7 @@ Once the vets service is running, Open a new terminal window and invoke the REST
 [source,sh,role="copypaste"]
 
 ----
-curl http://localhost:7070/vets | jq
+curl -s http://localhost:7070/vets | jq
 ----
 
 The output looks like:
@@ -244,7 +244,7 @@ Comment the following package:
 // import org.acme.service.VetsService;
 ----
 
-At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to expand the *Panache* class. Open `Vet.java` class file in `src/main/java/org/acme/model` of *quarkus-petclinic* project and *replace the existing code* with the following code:
+At this point, *Vet* and *Specialty* model objects are simply data transfer objects (DTOs). There is no longer a requirement to extend the *Panache* class in our `Vet` model class. Open `Vet.java` class file in `src/main/java/org/acme/model` of *quarkus-petclinic* project and *replace the existing code* with the following code:
 
 [source,java,role="copypaste"]
 ----
@@ -321,13 +321,15 @@ You might have an error(_Unsatisfied dependency for type org.acme.client.VetsRes
 
 image::remain-microservices.png[quarkus, 600]
 
-== Deploy to PostgreSQL in Production
+== Deploy to PostgreSQL in Production with OpenShift
 
-Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (e.g. `{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
+We will deploy our application to our production environment based on Kubernetes, containers, and [OpenShift](https://openshift.com). This will give us quite a bit of flexibility in how we develop the app going forward.
+
+Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (`{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
 
 image::ocplogin.png[login,700]
 
-Once logged in, click on the name of your project (`{{ USER_ID }}-project`):
+Once logged in, skip the tour by clicking _Skip Tour_, and then click on the name of your project (`{{ USER_ID }}-project`) (it's the only project you have access to):
 
 image::ocpproj.png[project,700]
 

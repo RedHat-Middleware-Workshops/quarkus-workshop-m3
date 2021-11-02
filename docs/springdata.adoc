@@ -47,15 +47,15 @@ public interface OwnerRepository extends Repository<Owner, Integer> {
 
 Here are more use cases how the presentation layer maps to the persistence layer using Spring Data JPA in Spring Petclinic application:
 
-* Vets displays all vets and their specialties
-* FindOwners is used to find owners by last name
-* FindOwnersRedirect redirects to findOwner
-* SelectOwner allows user to select from a list of multiple owners with the same last name
-* Owner displays a owner's data and a list of the owner's pets and their data
-* OwnerRedirect redirects to owner
-* Owner supports AddOwnerForm and EditOwnerForm
-* Pet supports AddPetForm and EditPetForm
-* Visit supports AddVisitForm
+* `Vets` displays all vets and their specialties
+* `FindOwners` is used to find owners by last name
+* `FindOwnersRedirect` redirects to `findOwner`
+* `SelectOwner` allows user to select from a list of multiple owners with the same last name
+* `Owner` displays a owner's data and a list of the owner's pets and their data
+* `OwnerRedirect` redirects to `owner`
+* `Owner` supports `AddOwnerForm` and `EditOwnerForm`
+* `Pet` supports `AddPetForm` and `EditPetForm`
+* `Visit` supports `AddVisitForm`
 
 Spring Petclinic application also supports 3 types of database such as *H2*, *HSQL*, and *MYSQL* below. In the previous lab, we used the _H2 in-memory database_ to store business data(i.e. vets, pets, owners):
 
@@ -89,7 +89,7 @@ If you really still prefer the repository pattern, Quarkus supports that as well
 
 We'll add Quarkus extensions to the Quarkus Petclinic application for using _Panache_ that simplifies access to data via Hibernate ORM for local development. 
 
-Open a new CodeReady Workspaces Terminal and run the following commands to add the extensions:
+Open a new CodeReady Workspaces Terminal (taking care not to close the other terminals running the Spring and Quarkus applications!) and run the following commands to add the extensions:
 
 [source,console,role="copypaste"]
 ----
@@ -182,7 +182,7 @@ Map a bidirectional many-to-many association as same as Spring Petclinic appliat
     public List<Specialty> specialties;
 ----
 
-Remove or comment the testing code that we added in the previous lab. Because we'll access the data layer directly but nore more need to have the dumb getters and setters:
+Remove or comment the now-unnecessary code (getters and setters and the `listAll()` method) that we added in the previous lab. Instead, we'll access the data layer directly through Panache' capabilities:
 
 [source,java]
 ----
