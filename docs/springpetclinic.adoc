@@ -4,11 +4,11 @@
 
 https://github.com/spring-projects/spring-framework[Spring^] is one of the most widely used Java frameworks for building applications. For the Java platform, The Spring Framework provides a comprehensive programming and configuration model for modern Java-based enterprise applications with dependency injection, events, resources, data transactions, web applications based on MVC(Model-view-controller) pattern, and more. It basically aims to simplify enterprise application development for Java developers. 
 
-While the Spring framework focuses more on providing enterprise features to developers, https://github.com/spring-projects/spring-boot[Spring Boot^] aims to shorten the code length and provide Spring developers an easier way to develop standalone microservices with an embedded runtime(i.e. Tomcat, Jetty, or Undertow), opinionated starter dependencies, externalized configuration, and more. However, it's *not* the most suitable framework when it comes to writing cloud-native microservices, designing serverless applications for event-driven architecture that are deployed to cloud infrastructure such as https://www.redhat.com/en/topics/containers/what-is-kubernetes[Kubernetes^], https://www.redhat.com/en/technologies/cloud-computing/openshift[Red Hat OpenShift Container Platform^], and take advantage of the underlying platform to do amazing things. In this workshop, we will walk you through how *Spring developers* are able to refactor *Spring* applications to Kubernetes-native microservices with *Quarkus* for dealing with these challenges. 
+While the Spring framework focuses more on providing enterprise features to developers, https://github.com/spring-projects/spring-boot[Spring Boot^] aims to shorten the code length and provide Spring developers an easier way to develop standalone microservices with an embedded runtime (Tomcat, Jetty, or Undertow), opinionated starter dependencies, externalized configuration, and more. However, it's *not* the most suitable framework when it comes to writing cloud-native microservices, designing serverless applications for event-driven architecture that are deployed to cloud infrastructure such as https://www.redhat.com/en/topics/containers/what-is-kubernetes[Kubernetes^], https://www.redhat.com/en/technologies/cloud-computing/openshift[Red Hat OpenShift Container Platform^], and take advantage of the underlying platform to do amazing things. In this workshop, we will walk you through how *Spring developers* are able to refactor *Spring* applications to Kubernetes-native microservices with *Quarkus* for dealing with these challenges. 
 
 == What is Spring PetClinic Project?
 
-https://github.com/spring-projects/spring-petclinic[Spring PetClinic^] is the most popular sample application that demonstrates all the common features of traditional enterprise Java application using a Spring Boot with Spring MVC and Spring Data. The PetClinic showcases how the users who work in the clinic manage their work in terms of view and manage information regarding the veterinarians, the clients, and their pets with the following use case:
+https://github.com/spring-projects/spring-framework[Spring^] is one of the most widely used Java frameworks for building applications. For the Java platform, The Spring Framework provides a comprehensive programming and configuration model for modern Java-based enterprise applications with dependency injection, events, resources, data transactions, web applications based on the Model-View-Controller (MVC) pattern, and more. It aims to simplify enterprise application development for Java developers. 
 
  * View a list of veterinarians and their specialties
  * View information pertaining to a pet owner
@@ -52,10 +52,6 @@ After a minute or two, you’ll be placed in the workspace:
 
 image::che-workspace.png[cdw, 900]
 
-After a minute or two, you’ll be placed in the workspace:
-
-image::che-workspace.png[cdw, 900]
-
 This IDE is based on Eclipse Che (which is in turn based on MicroSoft VS Code editor).
 
 You can see icons on the left for navigating between project explorer, search, version control (e.g. Git), debugging, and other plugins.  You’ll use these during the course of this workshop. Feel free to click on them and see what they do:
@@ -73,7 +69,7 @@ If you ever need to run commands that you don't see in a menu, you can press kbd
 
 ## Import Project
 
-Let's import our first project. Click on *Git Clone..* (or type kbd:[F1], enter 'git' and click on the auto-completed _Git Clone.._ )
+Let's import our first project. Click on *Clone Repository* (or type kbd:[F1], enter 'git' and click on the auto-completed _Git Clone.._ )
 
 image::che-workspace-gitclone.png[cdw, 900]
 
@@ -86,9 +82,9 @@ https://github.com/RedHat-Middleware-Workshops/quarkus-workshop-m3-labs
 
 image::crw-clone-repo.png[crw,900]
 
-Click on *Select Repository Location* then click on *Open in New Window*. It will reload your web browser immediately:
+Ensure `projects/` is selected, then click on *Select Repository Location* then click on *Add to Workspace*:
 
-image::crw-add-workspace.png[crw, 900]
+image::crw-add-workspace-2.png[crw, 900]
 
 The project is imported into your workspace and is visible in the project explorer (click on the top-most icon for project explorer):
 
@@ -121,7 +117,7 @@ Let's run the Spring Petclinic application. in a CodeReady Terminal:
 
 [source,sh,role="copypaste"]
 ----
-mvn spring-boot:run -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/spring-petclinic
+mvn spring-boot:run -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/spring-petclinic -DskipTests
 ----
 
 [NOTE]
