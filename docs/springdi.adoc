@@ -132,7 +132,7 @@ public class VetsService {
 
 <1> This is a scope annotation. It tells the container which context to associate the bean instance with. In this particular case, a single bean instance is created for the application and used by all other beans that inject *VetsService*.
 
-Edit the `VetsResource.java` class file in `src/main/java/org/acme/rest` to inject the VetsService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
+Edit the `VetsResource.java` class file to inject the VetsService(CDI bean). Add the following code under the `// TODO: Inject CDI Bean` comment:
 
 [source,java,role="copypaste"]
 ----
