@@ -55,7 +55,7 @@ In this lab, we'll refactor the usage of *Spring DI* to *Quarkus CDI*, which is 
 
 == Add CDI Injection to Vets
 
-The first step is to define the model bean (a simple POJO) for the Vet type. We'll add identical attributes taken from the _Vet_ java class in the Spring Petclinic application.
+The first step is to define the model(POJO) bean for store Vet object. We'll add identical attributes to the _Vet_ java class in Spring Petclic.
 
 Open the empty `Vet.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
