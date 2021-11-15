@@ -51,16 +51,18 @@ You should see:
 
 [source,none]
 ----
-__  ____  __  _____   ___  __ ____  ______ 
- --/ __ \/ / / / _ | / _ \/ //_/ / / / __/ 
- -/ /_/ / /_/ / __ |/ , _/ ,< / /_/ /\ \   
---\___\_\____/_/ |_/_/|_/_/|_|\____/___/   
-2020-10-06 21:48:06,052 INFO  [io.quarkus] (Quarkus Main Thread) quarkus-petclinic 1.0.0-SNAPSHOT on JVM (powered by Quarkus x.x.x) started in 0.878s. Listening on: http://0.0.0.0:8080
-2020-10-06 21:48:06,054 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-2020-10-06 21:48:06,054 INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, qute, resteasy-qute]
+INFO  [io.quarkus] (Quarkus Main Thread) people 1.0-SNAPSHOT on JVM (powered by Quarkus 2.2.3.Final-redhat-00013) started in 8.393s. Listening on: http://0.0.0.0:8080
+INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
+INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, qute, resteasy, resteasy-qute, smallrye-context-propagation]
+
+--
+Tests paused
+Press [r] to resume testing, [o] Toggle test output, [h] for more options>
 ----
 
-Note the amazingly fast startup time! The app is now running "locally" (within the Che container in which the workspace is also running). `localhost` refers to the Kubernetes pod, not "your" laptop (so therefore opening localhost:8080 in your browser will not do anything).
+Note the amazingly fast startup time! The app is now running *locally* (within the Che container in which the workspace is also running). `localhost` refers to the Kubernetes pod, not *your* laptop (so therefore opening localhost:8080 in your browser will not do anything).
+
+You can also see *Tests paused* by default when a Quarkus application gets started. Learn more details on https://youtu.be/NwODFFDZcNY[Quarkus Continuous Testing Video].
 
 CodeReady will also detect that the Quarkus app opens port `5005` (for debugging) and `8080` (for web requests). *Do not open port 5005*, but when prompted, *open the port `8080`*, which opens a small web browser in CodeReady:
 
@@ -80,7 +82,7 @@ image::crw-open-page.png[page, 800]
 
 Quarkus aims to provide a support for a full https://quarkus.io/extensions/[extension ecosystem^], to make it easy to discover and consume 3rd party extensions, as well as providing easier version management. In this step, you will use a `Qute Templating` extension to refactor Spring Web applications but also need a `RESTEasy Qute` extension to integrate your JAX-RS application with Qute templating engine.
 
-Open a `pom.xml` of _quarkus_petclinic_ in projects explorer then you should see that _quarkus-qute_ and _quarkus-qute-resteasy_ extensions are already added to your project:
+Open a `pom.xml` of _quarkus_petclinic_ in projects explorer then you should see that _quarkus-qute_ and _quarkus-resteasy-reactive-qute_ extensions are already added to your project:
 
 image::qute-extensions.png[port, 700]
 
@@ -88,7 +90,7 @@ You can also find the _Installed features: [cdi, qute, resteasy-qute]_ in the ab
 
 Let's go back to the *welcome page* in Spring Petclinic application. It provides the top menus to display a list of all vets, find an owner, or view documentation. For example, when you click on Spring logo, the page will go back to the welcome page:
 
-image::spring-petclinic-views.gif[spring, 900]
+image::spring-petclinic-views.png[spring, 900]
 
 In the `quarkus-petclinic` project, We'll start with a very simple template to create the welcome page. Open the empty `welcome.html` in `src/main/resources/templates`. By default, all files located in the `src/main/resources/templates` directory and its subdirectories are registered as templates. Templates are validated during startup and watched for changes in the development mode. 
 
@@ -172,7 +174,7 @@ Open the empty `owners.html` in `src/main/resources/templates`, and add the foll
 ----
 {#include header/}
 
-{#if owners == NULL || owners.size == 0} // <1>
+{#if owners == null || owners.size == 0} 
 
     <h2>Find Owners</h2>
 
@@ -181,11 +183,11 @@ Open the empty `owners.html` in `src/main/resources/templates`, and add the foll
         <div class="control-group" id="lastNameGroup">
         <label class="col-sm-2 control-label">Last name </label>
         <div class="col-sm-10">
-            {#if owners.size == 0} // <2>
+            {#if owners == null}
+                <input class="form-control" name="lastName" id="lastName" size="30" maxlength="80"/>
+            {#else}
                 <input class="form-control" name="lastName" id="lastName" value="{lastName}" size="30" maxlength="80"/>
                 <span class="help-inline"><div><p>has not been found</p></div></span>
-            {#else}
-                <input class="form-control" name="lastName" id="lastName" size="30" maxlength="80"/> 
             {/if}
         </div>
         </div>
@@ -200,9 +202,9 @@ Open the empty `owners.html` in `src/main/resources/templates`, and add the foll
     <a href="getOwner" class="btn btn-default" >Add Owner</a>
 
 {#else if owners.size > 1}
-    {#include ownersList/} // <3>
+    {#include ownersList/} 
 {#else}
-    {#include ownerDetails/} // <4>
+    {#include ownerDetails/} 
 {/if}
 
 {#include footer/}

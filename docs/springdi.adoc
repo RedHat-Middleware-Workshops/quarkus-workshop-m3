@@ -166,19 +166,13 @@ Edit the presentation layer to list dummy data(Vet). Open the `vets.html` in `sr
 
 [source,html,role="copypaste"]
 ----
-        {#for vet in vets} 
+        {#for vet in vets}
             <tr>
-                <td>{vet.firstName} {vet.lastName}</td>      
-                {#if vet.specialties.isEmpty}
-                    <td><span>none</span></td>
-                {#else}
-                    <td>
-                    <!-- TODO: Add a for loop to list specialty -->
-                    none
-                    </td>
-                {/if}
+                <td>{vet.firstName} {vet.lastName}</td>
+                <!-- TODO: Add a for loop to list specialty -->
+                <td>none</td>
             </tr>
-        {/for} 
+        {/for}
 ----
 
 Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page with dummy data:

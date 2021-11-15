@@ -93,15 +93,15 @@ Open a new CodeReady Workspaces Terminal (taking care not to close the other ter
 
 [source,console,role="copypaste"]
 ----
-mvn -q quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
 
 You should see:
 
 [source,console]
 ----
-✅ Extension io.quarkus:quarkus-hibernate-orm-panache has been installed
-✅ Extension io.quarkus:quarkus-jdbc-h2 has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-hibernate-orm-panache has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-jdbc-h2 has been installed
 ----
 
 Quarkus supports the notion of _configuration profiles_. These allows you to have multiple configurations in the same file and select between then via a _profile name_.
@@ -253,11 +253,17 @@ Edit the presentation layer to show the actual data. Open the `vets.html` in `sr
 
 [source,html,role="copypaste"]
 ----
-                    {#for specialty in vet.specialties}
-                        {specialty.name} 
-                    {/for}
+                {#if vet.specialties.isEmpty}
+                    <td><span>none</span></td>
+                {#else}
+                    <td>
+                        {#for specialty in vet.specialties}
+                            {specialty.name}
+                        {/for}
+                    </td>
+                {/if}
 ----
-
+        
 Don't forget to remove the dummy code, `none` in the HTML.
 
 Create a relation entity between _Specialty_ and _Vet_. Open the empty `VetSpecialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
