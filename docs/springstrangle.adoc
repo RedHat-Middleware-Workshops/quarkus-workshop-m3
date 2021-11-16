@@ -127,15 +127,15 @@ Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady 
 
 [source,sh,role="copypaste"]
 ----
-mvn -q quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
 ----
 
 You should see in the output:
 
 [source,console]
 ----
-✅ Extension io.quarkus:quarkus-resteasy-jackson has been installed
-✅ Extension io.quarkus:quarkus-rest-client has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-resteasy-jackson has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-rest-client has been installed
 ----
 
 * *quarkus-rest-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
@@ -323,7 +323,7 @@ image::remain-microservices.png[quarkus, 600]
 
 == Deploy to PostgreSQL in Production with OpenShift
 
-We will deploy our application to our production environment based on Kubernetes, containers, and [OpenShift](https://openshift.com). This will give us quite a bit of flexibility in how we develop the app going forward.
+We will deploy our application to our production environment based on Kubernetes, containers, and https://openshift.com[OpenShift^]. This will give us quite a bit of flexibility in how we develop the app going forward.
 
 Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (`{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
 

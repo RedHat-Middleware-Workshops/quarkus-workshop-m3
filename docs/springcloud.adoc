@@ -33,7 +33,7 @@ Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project 
 
 [source,sh,role="copypaste"]
 ----
-mvn -q quarkus:add-extension -Dextensions="kubernetes-config" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
+mvn quarkus:add-extension -Dextensions="kubernetes-config" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
 ----
 
 This extension works by reading ConfigMaps and Secrets directly from the Kubernetes API server using the https://quarkus.io/guides/kubernetes-client[Kubernetes Client^]. The extension understands the following types of ConfigMaps and Secrets as input sources:
@@ -45,7 +45,7 @@ You should see in the output:
 
 [source,console]
 ----
-✅ Extension io.quarkus:quarkus-kubernetes-config has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-kubernetes-config has been installed
 ----
 
 Open `application.properties` file in `src/main/resources` of *quarkus-petclinic-web-v2* project then append the following configuration:

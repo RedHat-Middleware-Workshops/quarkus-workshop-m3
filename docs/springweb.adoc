@@ -273,11 +273,7 @@ public class OwnersResource {
 
     // TODO: Add to search an existing owner by last name
 
-    // TODO: Add to Post transaction for adding a new owner
-
     // TODO: Add to retrieve an existing owner
-
-    // TODO: Add to Post transaction for editing an existing owner
 
 }
 ----

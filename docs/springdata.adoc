@@ -264,7 +264,7 @@ Edit the presentation layer to show the actual data. Open the `vets.html` in `sr
                 {/if}
 ----
         
-Don't forget to remove the dummy code, `none` in the HTML.
+Don't forget to remove the dummy code, `<td>none</td>` in the HTML.
 
 Create a relation entity between _Specialty_ and _Vet_. Open the empty `VetSpecialty.java` class file in `src/main/java/org/acme/model`, and add the following code:
 
@@ -430,52 +430,52 @@ import javax.persistence.SequenceGenerator;
 @Entity(name="pets")
 @Cacheable
 public class Pet extends PanacheEntityBase {
-  
-	@Id
+
+    @Id
     @SequenceGenerator(
-            name = "petsSequence",
-            sequenceName = "pets_id_seq",
-            allocationSize = 1,
-            initialValue = 1)
+        name = "petsSequence",
+        sequenceName = "pets_id_seq",
+        allocationSize = 1,
+        initialValue = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "petsSequence")
-	public Long id;
-	
-	public String name;
-	
+    public Long id;
+
+    public String name;
+
     @Column(name = "birth_date")
-	public LocalDate birthDate;
+    public LocalDate birthDate;
 
-	@ManyToOne
-	@JoinColumn(name = "type_id")
-	public PetType type;
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    public PetType type;
 
-	public PetType getPetType() {
-		return this.type;
-	}
-
-	public void setPetType(PetType type) {
-		this.type = type;
-	}
-
-	@ManyToOne // <1>
-	@JoinColumn(name = "owner_id")
-	public Owner owner;
-
-	public Owner getOwner() {
-		return this.owner;
-	}
-
-	public void setOwner(Owner owner) {
-		this.owner = owner;
-	}
-
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "pet") // <2>
-	public List<Visit> visits;
-	
-	public Long getId(){
-        return id;
+    public PetType getPetType() {
+            return this.type;
     }
-    
+
+    public void setPetType(PetType type) {
+            this.type = type;
+    }
+
+    @ManyToOne 
+    @JoinColumn(name = "owner_id")
+    public Owner owner;
+
+    public Owner getOwner() {
+            return this.owner;
+    }
+
+    public void setOwner(Owner owner) {
+            this.owner = owner;
+    }
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "pet") 
+    public List<Visit> visits;
+
+    public Long getId(){
+    return id;
+    }
+
 }
 ----
 
@@ -820,9 +820,7 @@ You should see the *owner's detail* page as same as you saw in the Spring Petcli
 
 image::quarkus-petclinic-findByLastname-result2.png[spring-schema.png, 900]
 
-== Refactor More Use Cases(Edit & Add)
-
-Spring Petclinic application allows us to have more Java Persistence API(JPA) Clinic Implementation for CRUD capabilities:
+*Great job!* Let’s convert the remaining CRUD capabilities as the Spring Petclinic application provides below: 
 
 * _Add_ a new owner and _Edit_ an existing owner
 * _Add_ a new pet and _Edit_ an existing pet
@@ -830,179 +828,16 @@ Spring Petclinic application allows us to have more Java Persistence API(JPA) Cl
 
 image::spring-more-crud.png[spring.png, 900]
 
-Edit the `OwnersResource.java` class to refactor the owner persistence layer. Add the following code under the `// TODO: Add to Post transaction for adding a new owner` comment:
+Executing the following magic shell script in a CodeReady Workspaces Terminal:
 
-[source,java,role="copypaste"]
+[source,shell,role="copypaste"]
 ----
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA) // <1>
-    @Transactional // <2>
-    @Path("addOwner")
-    public Response addOwner(@MultipartForm OwnerForm ownerForm) { // <3>
-
-        Owner newOwner = ownerForm.addOwner();
-        newOwner.persist(); // <4>
-        return Response.status(Status.MOVED_PERMANENTLY)
-                    .location(URI.create("/owners?id=" + newOwner.getId()))
-                    .build();
-    }
+sh ${CHE_PROJECTS_ROOT}/quarkus-workshop-m3-labs/scripts/convert-services.sh 
 ----
 
-<1> @Consumes annotation defines the expected content-type consumed by this request(parameters).
-<2> @Transactional annotation will make the method a transaction boundary.
-<3> @MultipartForm defines the parameter as a value object for incoming/outgoing request/responses of the multipart/form-data mime type.
-<4> Make sure to wrap methods modifying your database (e.g. newOwner.persist()) within a transaction.
+== Test the Remaining Services
 
-Add the following code under the `// TODO: Add to Post transaction for editing an existing owner` comment:
-
-[source,java,role="copypaste"]
-----
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Transactional
-    @Path("editOwner")
-    public Response editOwner(@MultipartForm OwnerForm ownerForm, @QueryParam("ownerId") Long ownerId) {
-
-        Owner existingOwner = service.findById(ownerId);
-        existingOwner = ownerForm.editOwner(existingOwner);
-        return Response.status(Status.MOVED_PERMANENTLY)
-                    .location(URI.create("/owners?id=" + ownerId))
-                    .build();
-    }
-----
-
-Also, don’t forget to add the import statement by un-commenting the import statement for *OwnersResource* near the top:
-
-[source,java]
-----
-import org.acme.model.Owner;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-import org.acme.model.OwnerForm;
-----
-
-RESTEasy has rich support for the _multipart/_ and _multipart/form-data_ mime types. The multipart mime format is used to pass lists of content bodies. Multiple content bodies are embedded in one message. We'll also use this `multipart/form-data` in the Quarkus Petclinic application. *@FormParam* allows you to inject individual form parameters from the request body into method parameter values.
-
-Open the empty `OwnerForm.java` class file in `src/main/java/org/acme/model`, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.model;
-
-import javax.ws.rs.FormParam;
-
-public class OwnerForm {
-
-    public @FormParam("firstName") String firstName;
-    public @FormParam("lastName") String lastName;
-    public @FormParam("address") String address;
-    public @FormParam("city") String city;
-    public @FormParam("telephone") String telephone;
-
-    public Owner addOwner() {
-        Owner newOwner = new Owner();
-        newOwner.firstName = firstName;
-        newOwner.lastName = lastName;
-        newOwner.address = address;
-        newOwner.city = city;
-        newOwner.telephone = telephone;
-        return newOwner;
-    }
-
-    public Owner editOwner(Owner existingOwner) {
-        existingOwner.firstName = firstName;
-        existingOwner.lastName = lastName;
-        existingOwner.address = address;
-        existingOwner.city = city;
-        existingOwner.telephone = telephone;
-        return existingOwner;
-    }
-    
-}
-----
-
-Next, we'll refactor the presentation layer to edit or add an owner. Open the empty `editOwner.html` in `src/main/resources/templates`, and add the following code:
-
-[source,html,role="copypaste"]
-----
-{#include header/}
-
-<h2>Owner</h2>
-
-<form class="form-horizontal" id="add-owner-form" method="post" action="{#if owner.id is null}addOwner{#else}editOwner?ownerId={owner.id}{/if}" enctype="multipart/form-data"> // <1>
-<div class="form-group has-feedback">
-    <div class="form-group">
-        <label class="col-sm-2 control-label">First Name</label>
-        <div class="col-sm-10">
-            <div>
-                <input class="form-control" type="text" id="firstName" name="firstName" value="{owner.firstName ?: ''}" />
-            </div>
-          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-        </div>
-    </div>
-
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Last Name</label>
-        <div class="col-sm-10">
-            <div>
-                <input class="form-control" type="text" id="lastName" name="lastName" value="{owner.lastName ?: ''}" />
-            </div>
-          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-          
-        </div>
-    </div>
-    
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Address</label>
-        <div class="col-sm-10">
-            <div>
-                <input class="form-control" type="text" id="address" name="address" value="{owner.address ?: ''}" />
-            </div>
-          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-          
-        </div>
-    </div>
-      
-    <div class="form-group">
-        <label class="col-sm-2 control-label">City</label>
-        <div class="col-sm-10">
-            <div>
-                <input class="form-control" type="text" id="city" name="city" value="{owner.city ?: ''}" />
-            </div>
-          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-        </div>
-    </div>
-      
-    <div class="form-group">
-        <label class="col-sm-2 control-label">Telephone</label>
-        <div class="col-sm-10">
-            <div>
-                <input class="form-control" type="text" id="telephone" name="telephone" value="{owner.telephone ?: ''}" />
-            </div>
-          <span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-        </div>
-    </div>
-
-</div>
-<div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-        <button class="btn btn-default" type="submit">{#if owner == 'new'}Add{#else}Update{/if} Owner</button>
-    </div>
-</div>
-</form>
-
-{#include footer/}
-----
-
-<1> Use multipart/form-data mime types to pass lists of content bodies. 
-
-Lastly, we need to use the `update` policy for only updating the schema in the database. Open an `application.properties` in `src/main/resources/` then *replace* the following configuration:
-
-[source,properties,role="copypaste"]
-----
-%dev.quarkus.hibernate-orm.database.generation=update
-----
-
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Add Owner`:
+Let's go through a few more CRUD features in Quarkus that you have exact same things in Spring Boot. Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Add Owner`:
 
 image::quarkus-new-owner.png[quarkus-petclinic.png, 900]
 
@@ -1020,7 +855,7 @@ Click on `Add Owner`. You should see the following owner information:
 
 image::quarkus-new-owner-info2.png[quarkus-petclinic.png, 900]
 
-Let's try to edit the owner infomation. Click on `Edit Owner`. Replace the first name and last name as below:
+Let's try to edit the owner information. Click on `Edit Owner`. Replace the first name and last name as below:
 
 * First Name: `James`
 * Last Name: `Falkner`
@@ -1031,158 +866,13 @@ Click on `Update Owner`. You should see the following owner information:
 
 image::quarkus-edit-owner-info.png[quarkus-petclinic.png, 900]
 
-When you click on `Find Owner` without *Last Name* in the FIND OWNERS menu, you shoud see the new owner(i.e. _James Falkner_) in the list:
+When you click on `Find Owner` without *Last Name* in the FIND OWNERS menu, you should see the new owner(i.e. _James Falkner_) in the list:
 
 image::quarkus-new-owner-list.png[quarkus-petclinic.png, 900]
 
-Good job! We'll now refactor the Pet and Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Pet object. Open the empty `PetsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
+*Nice work!* Let's give it try if the Pet and Visit persistence layer in Quarkus works as same as the Spring Petclinic application.
 
-[source,java,role="copypaste"]
-----
-package org.acme.service;
-
-import javax.enterprise.context.ApplicationScoped;
-import org.acme.model.Pet;
-
-@ApplicationScoped
-public class PetsService {
-   
-    public Pet findById(Long id) {
-        return Pet.findById(id.longValue());
-    }
-
-}
-----
-
-Open the empty `PetsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.rest;
-
-import java.net.URI;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-
-import io.quarkus.qute.Template;
-import io.quarkus.qute.TemplateInstance;
-
-import org.acme.model.Pet;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-
-import org.acme.service.OwnersService;
-import org.acme.model.PetForm;
-import org.acme.model.PetType;
-import org.acme.service.PetsService;
-import org.jboss.resteasy.annotations.jaxrs.QueryParam;
-
-@Path("/")
-public class PetsResource {
-
-    @Inject // <1>
-    OwnersService ownerService;
-
-    @Inject // <2>
-    PetsService petService;
-
-    @Inject // <3>
-    Template pet;
-
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    @Path("getPet") // <4>
-    public TemplateInstance getPet(@QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
-        return pet.data("active", "owners")
-                    .data("owner", ownerService.findById(ownerId))
-                    .data("pet", (petId != null ? petService.findById(petId) : petId));
-    }
-
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Transactional
-    @Path("addPet") // <5>
-    public Response addPet(@MultipartForm PetForm petForm, @QueryParam("ownerId") Long ownerId) {
-
-        Pet newPet = petForm.addPet();
-        newPet.setOwner(ownerService.findById(ownerId));
-        newPet.setPetType(PetType.findByName(petForm.type));
-        newPet.persist();
-        return Response.status(Status.MOVED_PERMANENTLY)
-                    .location(URI.create("/owners?id=" + ownerId))
-                    .build();
-    }
-
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Transactional
-    @Path("editPet") // <6>
-    public Response editOwner(@MultipartForm PetForm petForm, @QueryParam("ownerId") Long ownerId, @QueryParam("petId")Long petId) {
-
-        Pet existingPet = petService.findById(petId);
-        existingPet = petForm.editPet(existingPet);
-        existingPet.setOwner(ownerService.findById(ownerId));
-        existingPet.setPetType(PetType.findByName(petForm.type));
-        return Response.status(Status.MOVED_PERMANENTLY)
-            .location(URI.create("/owners?id=" + ownerId))
-            .build();
-    }
-
-}
-----
-
-<1> Inject OwnersService CDI bean to find a related owner
-<2> Inject PetsService CDI bean to find an existing pet by ID
-<3> Inject a Qute Template 
-<4> Retrieve the existing Pet information related to a certain owner
-<5> Add a new Pet information
-<6> Edit an existing Pet information
-
-Open the empty `PetForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.model;
-
-import java.time.LocalDate;
-import javax.ws.rs.FormParam;
-
-public class PetForm {
-
-    public @FormParam("name") String name;
-    public @FormParam("birthDate") LocalDate birthDate;
-    public @FormParam("type") String type;
-
-    public Pet addPet() {
-        Pet newPet = new Pet();
-        newPet.name = name;
-        newPet.birthDate = birthDate;
-        return newPet;
-    }
-
-    public Pet editPet(Pet existingPet) {
-        existingPet.name = name;
-        existingPet.birthDate = birthDate;
-        return existingPet;
-    }
-    
-}
-----
-
-[NOTE]
-====
-Pet presentation layer are already refactored using Quarkus Qute templates. Find more details in _src/main/resources/templates/pet.html_.
-====
-
-Go back to the _Quarkus Petclinic_ page in your browser, navigate an existing owner(`Jean Coleman`) infomation page:
+Go back to the _Quarkus Petclinic_ page in your browser, navigate an existing owner (`Jean Coleman`) information page:
 
 image::quarkus-jean-detail.png[quarkus-petclinic.png, 900]
 
@@ -1196,7 +886,7 @@ Click on `Add Pet`
 
 image::quarkus-new-pet-detail.png[quarkus-petclinic.png, 900]
 
-You should see the new pet(i.e. `Cooper`) in the list:
+You should see the new pet (`Cooper`) in the list:
 
 image::quarkus-new-pet-result.png[quarkus-petclinic.png, 900]
 
@@ -1207,138 +897,22 @@ Let's try to edit an existing pet's information. Click on `Edit Pet` in `Samanth
 
 image::quarkus-edit-pet.png[quarkus-petclinic.png, 900]
 
-Click on `Update Pet` then youu should see the updated pet(i.e. `Kitty`) in the list:
+Click on `Update Pet` then you should see the updated pet (`Kitty`) in the list:
 
 image::quarkus-edit-pet-result.png[quarkus-petclinic.png, 900]
 
-Lastly, We'll refactor the Visit persistence layer from Spring Petclinic application. Create a CDI bean to retrieve the Visit object. Open the empty `VisitsService.java` class file in `src/main/java/org/acme/service`, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.service;
-
-import javax.enterprise.context.ApplicationScoped;
-import org.acme.model.Pet;
-
-@ApplicationScoped
-public class VisitsService {
-
-    public Pet findById(Long id) {
-        return Pet.findById(id.longValue());
-    }
-
-}
-----
-
-Open the empty `VisitsResource.java` class in `src/main/java/org/acme/rest`, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.rest;
-
-import java.net.URI;
-
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
-
-import io.quarkus.qute.Template;
-import io.quarkus.qute.TemplateInstance;
-
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
-
-import org.acme.service.OwnersService;
-import org.acme.model.VisitForm;
-import org.acme.model.Visit;
-import org.acme.service.PetsService;
-import org.jboss.resteasy.annotations.jaxrs.QueryParam;
-
-@Path("/")
-public class VisitsResource {
-
-    @Inject
-    OwnersService ownerService;
-
-    @Inject
-    PetsService petService;
-
-    @Inject
-    Template visit;
-
-    @GET
-    @Produces(MediaType.TEXT_HTML)
-    @Path("getVisit")
-    public TemplateInstance getPet(@QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
-        return visit.data("active", "owners")
-                    .data("owner", ownerService.findById(ownerId))
-                    .data("pet", petService.findById(petId));
-    }
-
-    @POST
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @Transactional
-    @Path("addVisit")
-    public Response addPet(@MultipartForm VisitForm visitForm, @QueryParam("ownerId") Long ownerId, @QueryParam("petId") Long petId) {
-
-        Visit newVisit = visitForm.addVisit();
-        newVisit.setPet(petService.findById(petId));
-        newVisit.persist();
-        return Response.status(Status.MOVED_PERMANENTLY)
-                    .location(URI.create("/owners?id=" + ownerId))
-                    .build();
-    }
-
-}
-----
-
-Open the empty `VisitForm.java` class file in `src/main/java/org/acme/model` to inject individual form parameters from the request body into method parameter values, and add the following code:
-
-[source,java,role="copypaste"]
-----
-package org.acme.model;
-
-import java.time.LocalDate;
-import javax.ws.rs.FormParam;
-
-public class VisitForm {
-
-    public @FormParam("date") LocalDate date;
-    public @FormParam("description") String description;
-
-    public Visit addVisit() {
-        Visit newVisit = new Visit();
-        newVisit.date = date;
-        newVisit.description = description;
-        return newVisit;
-    }
-
-}
-----
-
-[NOTE]
-====
-Visit presentation layer are already refactored using Quarkus Qute templates. Find more details in _src/main/resources/templates/visit.html_.
-====
-
-Go back to the previous owner(i.e. `Jean Coleman`) information page in your browser, click on `Add Visit` for *Cooper*:
+Go back to the previous owner (`Jean Coleman`) information page in your browser, click on `Add Visit` for *Cooper*:
 
 image::quarkus-add-visit.png[quarkus-petclinic.png, 900]
 
-Input the follwing visit information to make a reservation to see the Vet:
+Input the following visit information to make a reservation to see the Vet:
 
 * Date: `2021-12-12`
 * Description: `cold`
 
 image::quarkus-add-visit-detail.png[quarkus-petclinic.png, 900]
 
-Click on `Add Visit` then you should see the new visit inforamtion of `Cooper` in the list:
+Click on `Add Visit` then you should see the new visit information of `Cooper` in the list:
 
 image::quarkus-add-visit-result.png[quarkus-petclinic.png, 900]
 
