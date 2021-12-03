@@ -511,9 +511,12 @@ sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_
 
 [NOTE]
 ====
-You might have a failure(_i.e. visits-service: Failed to build quarkus application: io.quarkus.builder.BuildException: Build failure: Build failed due to errors_) while one of services is building then you need to deploy a certain service like:
+You might have one or more failures (_i.e. visits-service: Failed to build quarkus application: io.quarkus.builder.BuildException: Build failure: Build failed due to errors_). If this happens, simply re-run the same script again to re-deploy the remaining services:
 
-sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-visits-service.sh
+[source, shell, role="copypaste"]
+----
+sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_ID }}
+----
 ====
 
 Wait for the script to complete before continuing. It normally takes a few minutes to deploy 3 applications and databases to OpenShift.
