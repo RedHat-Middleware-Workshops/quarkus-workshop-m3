@@ -907,7 +907,7 @@ image::quarkus-add-visit.png[quarkus-petclinic.png, 900]
 
 Input the following visit information to make a reservation to see the Vet:
 
-* Date: `2021-12-12`
+* Date: `2022-12-12`
 * Description: `cold`
 
 image::quarkus-add-visit-detail.png[quarkus-petclinic.png, 900]
