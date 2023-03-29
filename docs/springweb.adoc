@@ -32,7 +32,7 @@ Open a new terminal in CodeReady Workspaces then run the following `mvn` (Maven)
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -f $PROJECT_SOURCE/quarkus-petclinic
 ----
 
 Leave this terminal window open throughout the lab! You will complete the entire lab without shutting down Quarkus Live Coding mode, so be careful not to close the tab (if you do, you re-run it). This is very useful for quick experimentation.
@@ -72,7 +72,7 @@ You should see the default Quarkus welcome page (you may need to click the _relo
 
 image::welcome-quarkus-spring.png[port, 900]
 
-Click on the URL link at the upper right to open the same default page in a separate browser tab:
+Select the URL link at the upper right to open the same default page in a separate browser tab:
 
 image::crw-open-page.png[page, 800]
 
@@ -88,7 +88,7 @@ image::qute-extensions.png[port, 700]
 
 You can also find the _Installed features: [cdi, qute, resteasy-qute]_ in the above Quarkus runtime logs.
 
-Let's go back to the *welcome page* in Spring Petclinic application. It provides the top menus to display a list of all vets, find an owner, or view documentation. For example, when you click on Spring logo, the page will go back to the welcome page:
+Let's go back to the *welcome page* in Spring Petclinic application. It provides the top menus to display a list of all vets, find an owner, or view documentation. For example, when you select Spring logo, the page will go back to the welcome page:
 
 image::spring-petclinic-views.png[spring, 900]
 
@@ -148,7 +148,7 @@ Wow, how cool is that? Supersonic Subatomic live reload! And we’re just gettin
 
 [NOTE]
 ====
-We just created one template to render the new welcome page resource so you should see *404 - Resource Not Found* when you click on the other menus except for _Home_. 
+We just created one template to render the new welcome page resource so you should see *404 - Resource Not Found* when you select the other menus except for _Home_. 
 
 You might see the following error in CodeReady Workspace Terminal. It happened before the new initial page(welcome.html) was rendered and it won't happen again.
 
@@ -278,7 +278,7 @@ public class OwnersResource {
 }
 ----
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then you should see the following rendered page:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `FIND OWNERS` menu then you should see the following rendered page:
 
 image::quarkus-petclinic-owners.png[quarkus-petclinic, 900]
 
@@ -350,7 +350,7 @@ public class VetsResource {
 
 <1> We will add a dataset using Hibernate ORM and Panache extensions in the next lab.
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `VETERINARIAN` menu then you should see the following rendered page:
 
 image::quarkus-petclinic-vets.png[quarkus-petclinic, 900]
 
@@ -402,7 +402,7 @@ public class OupsResource {
 }
 ----
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `ERROR` menu then you should see the following rendered page:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `ERROR` menu then you should see the following rendered page:
 
 image::quarkus-petclinic-oups.png[quarkus-petclinic, 900]
 

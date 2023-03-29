@@ -175,7 +175,7 @@ Edit the presentation layer to list dummy data(Vet). Open the `vets.html` in `sr
         {/for}
 ----
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page with dummy data:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `VETERINARIAN` menu then you should see the following rendered page with dummy data:
 
 image::quarkus-petclinic-vets-cdi.png[quarkus-petclinic, 900]
 

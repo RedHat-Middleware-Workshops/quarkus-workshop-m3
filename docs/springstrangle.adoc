@@ -72,7 +72,7 @@ Open a new CodeReady Workspaces Terminal and run the following commands to run t
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f $PROJECT_SOURCE/quarkus-petclinic-vets-service
 ----
 
 [NOTE]
@@ -127,7 +127,7 @@ Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady 
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $PROJECT_SOURCE/quarkus-petclinic
 ----
 
 You should see in the output:
@@ -283,7 +283,7 @@ Run the following command to delete `VetsService.java` file in CodeReady Workspa
 
 [source,sh,role="copypaste"]
 ----
-rm -rf $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
+rm -rf $PROJECT_SOURCE/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
 ----
 
 The existing data in monolith Petclinic application is no longer required because the data is now managed by the new _vets service_ withe a separated database. Comment the following database entries in `import.sql` file of *quarkus-petclinic* project:
@@ -308,7 +308,7 @@ The existing data in monolith Petclinic application is no longer required becaus
 -- INSERT INTO vet_specialties (id, vet_id, specialty_id) VALUES (nextval('hibernate_sequence'), 5, 1);
 ----
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `VETERINARIAN` menu then you should see the following rendered page:
 
 image::quarkus-vets-data.png[spring-schema.png, 900]
 
@@ -329,7 +329,7 @@ Our production environment needs a "real" database so let's deploy a Postgres da
 
 image::ocplogin.png[login,700]
 
-Once logged in, skip the tour by clicking _Skip Tour_, and then click on the name of your project (`{{ USER_ID }}-project`) (it's the only project you have access to):
+Once logged in, skip the tour by clicking _Skip Tour_, and then select the name of your project (`{{ USER_ID }}-project`) (it's the only project you have access to):
 
 image::ocpproj.png[project,700]
 
@@ -341,11 +341,11 @@ click **+Add** on the left, on the _Database_ box on the project overview:
 
 image::db.png[db, 700]
 
-Type in `postgres` in the search box, and click on the *PostgreSQL (ephemeral)*:
+Type in `postgres` in the search box, and select the *PostgreSQL (ephemeral)*:
 
 image::db-postgres.png[db, 700]
 
-Click on *Instantiate Template* and fill in the following fields, leaving the others as their default values:
+Select *Instantiate Template* and fill in the following fields, leaving the others as their default values:
 
 * **Namespace** (the first one): Select `{{ USER_ID }}-project`
 * **Namespace** (the _second_ one): `openshift`
@@ -360,13 +360,13 @@ Click *Create*.
 
 == Login to OpenShift
 
-Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Click on *Login to OpenShift*:
+Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Select *Login to OpenShift*:
 
 image::cmd-login.png[login,700]
 
 [NOTE]
 ====
-When you click on this, CodeReady Workspaces executes the following command:
+When you select this, CodeReady Workspaces executes the following command:
 *oc login https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true --username={{ USER_ID }} --password={{ OPENSHIFT_USER_PASSWORD }}*
 ====
 
@@ -441,7 +441,7 @@ Build and deploy the `vets-service` application via running the following maven 
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-vets-service
+mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-vets-service
 ----
 
 **Wait for it to finish!**. You should get a **BUILD SUCCESS** message at the end. Once that's done, make sure it's actually done rolling out:
@@ -498,7 +498,7 @@ oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
 oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite
 ----
 
-This will deploy the new vets service to our new project. Click on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
+This will deploy the new vets service to our new project. Select the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
 
 image::vets-deployment.png[inventory_db_deployments, 700]
 
@@ -506,7 +506,7 @@ image::vets-deployment.png[inventory_db_deployments, 700]
 
 [source, shell, role="copypaste"]
 ----
-sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_ID }}
+sh $PROJECT_SOURCE/scripts/deploy-remain.sh {{ USER_ID }}
 ----
 
 [NOTE]
@@ -515,7 +515,7 @@ You might have one or more failures (_i.e. visits-service: Failed to build quark
 
 [source, shell, role="copypaste"]
 ----
-sh $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/scripts/deploy-remain.sh {{ USER_ID }}
+sh $PROJECT_SOURCE/scripts/deploy-remain.sh {{ USER_ID }}
 ----
 ====
 
@@ -525,9 +525,9 @@ When the script completes, the app is deployed to OpenShift. Back on the {{ CONS
 
 image::topology-view.png[topology-view.png, 900]
 
-Click on `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. 
+Select `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. 
 
-Let's do a quick sanity test if new microservices are working well. Click on http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
+Let's do a quick sanity test if new microservices are working well. Select http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
 

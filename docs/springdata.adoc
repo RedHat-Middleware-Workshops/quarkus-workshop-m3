@@ -93,7 +93,7 @@ Open a new CodeReady Workspaces Terminal (taking care not to close the other ter
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $PROJECT_SOURCE/quarkus-petclinic
 ----
 
 You should see:
@@ -317,7 +317,7 @@ We don't need to create schema(i.e. vets, specialties) in database as we had to 
 
 image::spring-schema.png[spring-schema.png, 900]
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `VETERINARIAN` menu then you should see the following rendered page:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `VETERINARIAN` menu then you should see the following rendered page:
 
 image::quarkus-vets-data.png[spring-schema.png, 900]
 
@@ -796,7 +796,7 @@ INSERT INTO visits (id, pet_id, visit_date, description) VALUES (3, 8, '2013-01-
 INSERT INTO visits (id, pet_id, visit_date, description) VALUES (4, 7, '2013-01-04', 'spayed');
 ----
 
-Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Find Owner` button without typing the last name in:
+Go back to the _Quarkus Petclinic_ page in your browser, select the `FIND OWNERS` menu then select `Find Owner` button without typing the last name in:
 
 image::quarkus-petclinic-listall.png[spring-schema.png, 900]
 
@@ -804,7 +804,7 @@ You should see the following *all owners* as same as you saw in the Spring Petcl
 
 image::quarkus-petclinic-listall-result.png[spring-schema.png, 900]
 
-Let's try to search by the last name. Go back to the previous page or click on the `FIND OWNERS` menu. Type `Davis` in the last name input box:
+Let's try to search by the last name. Go back to the previous page or select the `FIND OWNERS` menu. Type `Davis` in the last name input box:
 
 image::quarkus-petclinic-findByLastname.png[spring-schema.png, 900]
 
@@ -812,7 +812,7 @@ You should see *2 owners* as same as you saw in the Spring Petclinic application
 
 image::quarkus-petclinic-findByLastname-result.png[spring-schema.png, 900]
 
-Search by the last name once again. Go back to the previous page or click on the `FIND OWNERS` menu. Type `Franklin` in the last name input box:
+Search by the last name once again. Go back to the previous page or select the `FIND OWNERS` menu. Type `Franklin` in the last name input box:
 
 image::quarkus-petclinic-findByLastname2.png[spring-schema.png, 900]
 
@@ -837,7 +837,7 @@ sh ${CHE_PROJECTS_ROOT}/quarkus-workshop-m3-labs/scripts/convert-services.sh
 
 == Test the Remaining Services
 
-Let's go through a few more CRUD features in Quarkus that you have exact same things in Spring Boot. Go back to the _Quarkus Petclinic_ page in your browser, click on the `FIND OWNERS` menu then click on `Add Owner`:
+Let's go through a few more CRUD features in Quarkus that you have exact same things in Spring Boot. Go back to the _Quarkus Petclinic_ page in your browser, select the `FIND OWNERS` menu then select `Add Owner`:
 
 image::quarkus-new-owner.png[quarkus-petclinic.png, 900]
 
@@ -851,22 +851,22 @@ Input the new owner's information as below:
 
 image::quarkus-new-owner-info.png[quarkus-petclinic.png, 900]
 
-Click on `Add Owner`. You should see the following owner information:
+Select `Add Owner`. You should see the following owner information:
 
 image::quarkus-new-owner-info2.png[quarkus-petclinic.png, 900]
 
-Let's try to edit the owner information. Click on `Edit Owner`. Replace the first name and last name as below:
+Let's try to edit the owner information. Select `Edit Owner`. Replace the first name and last name as below:
 
 * First Name: `James`
 * Last Name: `Falkner`
 
 image::quarkus-edit-owner.png[quarkus-petclinic.png, 900]
 
-Click on `Update Owner`. You should see the following owner information:
+Select `Update Owner`. You should see the following owner information:
 
 image::quarkus-edit-owner-info.png[quarkus-petclinic.png, 900]
 
-When you click on `Find Owner` without *Last Name* in the FIND OWNERS menu, you should see the new owner(i.e. _James Falkner_) in the list:
+When you select `Find Owner` without *Last Name* in the FIND OWNERS menu, you should see the new owner(i.e. _James Falkner_) in the list:
 
 image::quarkus-new-owner-list.png[quarkus-petclinic.png, 900]
 
@@ -876,13 +876,13 @@ Go back to the _Quarkus Petclinic_ page in your browser, navigate an existing ow
 
 image::quarkus-jean-detail.png[quarkus-petclinic.png, 900]
 
-Click on `Add new Pet` and input the following information:
+Select `Add new Pet` and input the following information:
 
 * Name: `Cooper`
 * Birth Date: `2020-01-01`
 * Type: `dog`
 
-Click on `Add Pet`
+Select `Add Pet`
 
 image::quarkus-new-pet-detail.png[quarkus-petclinic.png, 900]
 
@@ -890,18 +890,18 @@ You should see the new pet (`Cooper`) in the list:
 
 image::quarkus-new-pet-result.png[quarkus-petclinic.png, 900]
 
-Let's try to edit an existing pet's information. Click on `Edit Pet` in `Samantha` then update the following information:
+Let's try to edit an existing pet's information. Select `Edit Pet` in `Samantha` then update the following information:
 
 * Name: `Kitty`
 * Birth Date: `2020-09-04`
 
 image::quarkus-edit-pet.png[quarkus-petclinic.png, 900]
 
-Click on `Update Pet` then you should see the updated pet (`Kitty`) in the list:
+Select `Update Pet` then you should see the updated pet (`Kitty`) in the list:
 
 image::quarkus-edit-pet-result.png[quarkus-petclinic.png, 900]
 
-Go back to the previous owner (`Jean Coleman`) information page in your browser, click on `Add Visit` for *Cooper*:
+Go back to the previous owner (`Jean Coleman`) information page in your browser, select `Add Visit` for *Cooper*:
 
 image::quarkus-add-visit.png[quarkus-petclinic.png, 900]
 
@@ -912,7 +912,7 @@ Input the following visit information to make a reservation to see the Vet:
 
 image::quarkus-add-visit-detail.png[quarkus-petclinic.png, 900]
 
-Click on `Add Visit` then you should see the new visit information of `Cooper` in the list:
+Select `Add Visit` then you should see the new visit information of `Cooper` in the list:
 
 image::quarkus-add-visit-result.png[quarkus-petclinic.png, 900]
 

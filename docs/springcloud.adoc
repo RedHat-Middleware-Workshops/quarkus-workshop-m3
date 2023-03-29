@@ -10,7 +10,7 @@ A frequently asked question is *how does Quarkus with OpenShift handle the Sprin
 
 Quarkus includes the https://quarkus.io/guides/kubernetes-config[kubernetes-config^] extension, which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as configuration sources, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloud Config^] and https://www.consul.io/[Consul^].
 
-In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project/configmaps[Config Maps^] in Developer Console, then click on `Create Config Map`:
+In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project/configmaps[Config Maps^] in Developer Console, then select `Create Config Map`:
 
 image::create-configmap.png[configmap.png, 900]
 
@@ -33,7 +33,7 @@ Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project 
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="kubernetes-config" -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
+mvn quarkus:add-extension -Dextensions="kubernetes-config" -f $PROJECT_SOURCE/quarkus-petclinic-web-v2
 ----
 
 This extension works by reading ConfigMaps and Secrets directly from the Kubernetes API server using the https://quarkus.io/guides/kubernetes-client[Kubernetes Client^]. The extension understands the following types of ConfigMaps and Secrets as input sources:
@@ -99,7 +99,7 @@ Let's modify the Qute template to show the message that refers to OpenShift Conf
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-web-v2
+mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-web-v2
 ----
 
 When the build and deployment complete, the app will be rolled out to OpenShift. You can watch it until it completes by running the following in the CodeReady Workspaces Terminal:
@@ -182,7 +182,7 @@ The `call()` method exposes an HTTP GET endpoint which will return the status of
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $CHE_PROJECTS_ROOT/quarkus-workshop-m3-labs/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
+mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
 ----
 
 When the build completes, the app is deployed to OpenShift. Access the health endpoint again using _curl_ and the result looks like:
@@ -218,7 +218,7 @@ You now see the default health check, along with your new customer (owner) healt
 You can define separate readiness and liveness probes using `@Liveness` and `@Readiness` annotations and access them separately at `/health/live` and `/health/ready`.
 ====
 
-Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] and click on `DC(customers-service)` then select `Edit Health Checks` in *Actions* dropbox:
+Back on the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] and select `DC(customers-service)` then select `Edit Health Checks` in *Actions* dropbox:
 
 image::customers-dc.png[health.png, 900]
 
@@ -226,7 +226,7 @@ You should see `Readiness Probe` and `Liveness Probe` are already added along wi
 
 image::health-probe.png[health.png, 700]
 
-Click on `Edit Probe` in _Readniess Probe_ then you should see the way to check if the container is ready to handle requests. A failed readiness probe means that a container should not receive any traffic from a proxy, even if it's running:
+Select `Edit Probe` in _Readniess Probe_ then you should see the way to check if the container is ready to handle requests. A failed readiness probe means that a container should not receive any traffic from a proxy, even if it's running:
 
 image::readiness-probe.png[health.png, 700]
 
