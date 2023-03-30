@@ -832,7 +832,7 @@ Executing the following magic shell script in a VS Code Terminal:
 
 [source,shell,role="copypaste"]
 ----
-sh ${CHE_PROJECTS_ROOT}/quarkus-workshop-m3-labs/scripts/convert-services.sh 
+sh ${PROJECT_SOURCE}/scripts/convert-services.sh 
 ----
 
 == Test the Remaining Services
@@ -907,7 +907,7 @@ image::quarkus-add-visit.png[quarkus-petclinic.png, 900]
 
 Input the following visit information to make a reservation to see the Vet:
 
-* Date: `2022-12-12`
+* Date: `2023-12-12`
 * Description: `cold`
 
 image::quarkus-add-visit-detail.png[quarkus-petclinic.png, 900]
