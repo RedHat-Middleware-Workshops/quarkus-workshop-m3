@@ -360,16 +360,12 @@ Click *Create*.
 
 == Login to OpenShift
 
-Although your Eclipse Che workspace is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Select *Login to OpenShift*:
+Although your VS Code is running on the Kubernetes cluster, it's running with a default restricted _Service Account_ that prevents you from creating most resource types. So we'll log in with your workshop user. Execute the following command in the VS Code terminal:
 
-image::cmd-login.png[login,700]
-
-[NOTE]
-====
-When you select this, VS Code executes the following command:
-*oc login https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true --username={{ USER_ID }} --password={{ OPENSHIFT_USER_PASSWORD }}*
-====
-
+[source,sh,role="copypaste"]
+----
+oc login https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true --username={{ USER_ID }} --password={{ OPENSHIFT_USER_PASSWORD }}
+----
 
 You should see:
 
@@ -377,26 +373,14 @@ You should see:
 ----
 Login successful.
 
-You have one project on this server: "{{ USER_ID }}-project"
+You have access to the following projects and can switch between them with 'oc project <projectname>':
 
-Using project "{{ USER_ID }}-project".
+  * {{ USER_ID }}-devspaces
+    {{ USER_ID }}-project
+
+Using project "user1-devspaces".
 Welcome! See 'oc help' to get started.
 ----
-
-[NOTE]
-====
-After you log in using *Login to OpenShift*, the terminal is no longer usable as a regular terminal. You can close the terminal window. You will still be logged in when you open more terminals later!
-====
-
-Congratulations, you are now authenticated to the OpenShift server via the CLI. We'll use the prettier web console later on in this lab.
-
-[WARNING]
-====
-The login session might timeout after long periods of inactivity. If this happens, you'll get messages like `Error from server (Forbidden): xxxxx is forbidden: User "system:anonymous" cannot xxxxx`. Simply login again!
-====
-
-https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/[Namespaces^] are a top level concept to help you organize your deployments and teams of developers. A namespace allows a community of users (or a user) to organize and manage
-their content in isolation from other communities. OpenShift _projects_ provide additional functionality for managing Kubernetes namespaces.
 
 == Deploy vets microservice to OpenShift
 
