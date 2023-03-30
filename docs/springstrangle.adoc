@@ -68,7 +68,7 @@ import javax.ws.rs.GET;
 import org.acme.model.Vet;
 ----
 
-Open a new CodeReady Workspaces Terminal and run the following commands to run the vets service locally:
+Open a new VS Code Terminal and run the following commands to run the vets service locally:
 
 [source,console,role="copypaste"]
 ----
@@ -123,7 +123,7 @@ The monlith web application will need to make _HTTP_ calls to the the vets servi
 
 The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
-Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in CodeReady Workspaces Terminal:
+Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -279,7 +279,7 @@ public class Specialty {
 }
 ----
 
-Run the following command to delete `VetsService.java` file in CodeReady Workspaces Terminal:
+Run the following command to delete `VetsService.java` file in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -366,7 +366,7 @@ image::cmd-login.png[login,700]
 
 [NOTE]
 ====
-When you select this, CodeReady Workspaces executes the following command:
+When you select this, VS Code executes the following command:
 *oc login https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --insecure-skip-tls-verify=true --username={{ USER_ID }} --password={{ OPENSHIFT_USER_PASSWORD }}*
 ====
 
@@ -437,7 +437,7 @@ Append the following variables in `src/main/resources/application.properties` wi
 <4> Set the Docker build strategy
 <5> Instructs the extension to generate an OpenShift `Route`
 
-Build and deploy the `vets-service` application via running the following maven plugin in CodeReady Workspaces Terminal:
+Build and deploy the `vets-service` application via running the following maven plugin in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -502,7 +502,7 @@ This will deploy the new vets service to our new project. Select the {{ CONSOLE_
 
 image::vets-deployment.png[inventory_db_deployments, 700]
 
-*Great job!* Let's build and deploy the remaining microservices(_Visits_, _Customers_, _Web_) to OpenShift by executing the following shell script in a CodeReady Workspaces Terminal:
+*Great job!* Let's build and deploy the remaining microservices(_Visits_, _Customers_, _Web_) to OpenShift by executing the following shell script in a VS Code Terminal:
 
 [source, shell, role="copypaste"]
 ----

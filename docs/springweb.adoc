@@ -28,7 +28,7 @@ Throughout this lab you'll discover how Quarkus can make your development of clo
 
 **Live Coding** (also referred to as _dev mode_) allows us to run the app and make changes on the fly. Quarkus will automatically re-compile and reload the app when changes are made. This is a powerful and efficient style of developing that you will use throughout the lab.
 
-Open a new terminal in CodeReady Workspaces then run the following `mvn` (Maven) commands to run the Quarkus petclinic application:
+Open a new terminal in VS Code then run the following `mvn` (Maven) commands to run the Quarkus petclinic application:
 
 [source,sh,role="copypaste"]
 ----

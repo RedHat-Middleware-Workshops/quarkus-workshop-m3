@@ -89,7 +89,7 @@ If you really still prefer the repository pattern, Quarkus supports that as well
 
 We'll add Quarkus extensions to the Quarkus Petclinic application for using _Panache_ that simplifies access to data via Hibernate ORM for local development. 
 
-Open a new CodeReady Workspaces Terminal (taking care not to close the other terminals running the Spring and Quarkus applications!) and run the following commands to add the extensions:
+Open a new VS Code Terminal (taking care not to close the other terminals running the Spring and Quarkus applications!) and run the following commands to add the extensions:
 
 [source,console,role="copypaste"]
 ----
@@ -828,7 +828,7 @@ image::quarkus-petclinic-findByLastname-result2.png[spring-schema.png, 900]
 
 image::spring-more-crud.png[spring.png, 900]
 
-Executing the following magic shell script in a CodeReady Workspaces Terminal:
+Executing the following magic shell script in a VS Code Terminal:
 
 [source,shell,role="copypaste"]
 ----

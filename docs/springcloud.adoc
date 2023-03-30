@@ -29,7 +29,7 @@ data:
 
 image::myconfigmap.png[configmap.png, 700]
 
-Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project in CodeReady Workspaces Terminal:
+Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -95,14 +95,14 @@ Let's modify the Qute template to show the message that refers to OpenShift Conf
 <h2>Welcome, {message}</h2>
 ----
 
-*Rebuild* and *redeploy* the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+*Rebuild* and *redeploy* the people application via running the following maven plugin in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
 mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-web-v2
 ----
 
-When the build and deployment complete, the app will be rolled out to OpenShift. You can watch it until it completes by running the following in the CodeReady Workspaces Terminal:
+When the build and deployment complete, the app will be rolled out to OpenShift. You can watch it until it completes by running the following in the VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -178,7 +178,7 @@ public class OwnersHealthCheck implements HealthCheck {
 
 The `call()` method exposes an HTTP GET endpoint which will return the status of the service. The logic of this check does a simple query to the underlying database to ensure the connection to it is stable and available. The method is also annotated with MicroProfile's `@Readiness` annotation, which directs Quarkus to expose this endpoint as a health check at `/health/ready`.
 
-*Rebuild* and *redeploy* the people application via running the following maven plugin in CodeReady Workspaces Terminal:
+*Rebuild* and *redeploy* the people application via running the following maven plugin in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
