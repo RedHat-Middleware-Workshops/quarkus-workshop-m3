@@ -51,16 +51,16 @@ You should see:
 
 [source,none]
 ----
-INFO  [io.quarkus] (Quarkus Main Thread) people 1.0-SNAPSHOT on JVM (powered by Quarkus xx.xx.xx.) started in 8.393s. Listening on: http://0.0.0.0:8080
+INFO  [io.quarkus] (Quarkus Main Thread) people 1.0-SNAPSHOT on JVM (powered by Quarkus xx.xx.xx.) started in 2.740s. Listening on: http://0.0.0.0:8080
 INFO  [io.quarkus] (Quarkus Main Thread) Profile dev activated. Live Coding activated.
-INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, qute, resteasy, resteasy-qute, smallrye-context-propagation]
+INFO  [io.quarkus] (Quarkus Main Thread) Installed features: [cdi, qute, resteasy, resteasy-qute, smallrye-context-propagation, vertx]
 
 --
 Tests paused
-Press [r] to resume testing, [o] Toggle test output, [h] for more options>
+Press [r] to resume testing, [o] Toggle test output, [:] for the terminal, [h] for more options>
 ----
 
-Note the amazingly fast startup time! The app is now running *locally* (within the Che container in which the workspace is also running). `localhost` refers to the Kubernetes pod, not *your* laptop (so therefore opening localhost:8080 in your browser will not do anything).
+Note the amazingly fast startup time! The app is now running *locally* (within the Dev Spaces container in which the workspace is also running). `localhost` refers to the Kubernetes pod, not *your* laptop (so therefore opening localhost:8080 in your browser will not do anything).
 
 You can also see *Tests paused* by default when a Quarkus application gets started. Learn more details on https://youtu.be/NwODFFDZcNY[Quarkus Continuous Testing Video].
 
@@ -68,15 +68,18 @@ CodeReady will also detect that the Quarkus app opens port `5005` (for debugging
 
 image::open-port.png[port, 700]
 
+[NOTE]
+====
+In case you see the popup message below, select `Open`.
+
+image::open-link-spring.png[port, 700]
+====
+
 You should see the default Quarkus welcome page (you may need to click the _reload_ icon):
 
 image::welcome-quarkus-spring.png[port, 900]
 
-Select the URL link at the upper right to open the same default page in a separate browser tab:
-
-image::crw-open-page.png[page, 800]
-
-`leave this page/tab open` because you will develop new logical views and implemented the use cases like the Spring Petclinic application in the next labs.
+`Leave this page/tab open` because you will develop new logical views and implemented the use cases like the Spring Petclinic application in the next labs.
 
 == Create Qute Templates to refactor Spring Web
 
@@ -140,6 +143,10 @@ Delete the existing default landing page(`index.html`) to render a new welcome p
 
 image::delete-index.png[quarkus-logo, 700]
 
+Select `Delete`.
+
+image::delete-index-confirm.png[quarkus-logo, 700]
+
 Now, let’s exercise the live reload capabilities of Quarkus. Go back to the Quarkus welcome page in your browser then `reload` the page. It should now show the following new welcome page that you saw in the Spring Petclinic welcome page:
 
 image::quarkus-petclinic-home.png[quarkus-petclinic, 900]
@@ -150,7 +157,7 @@ Wow, how cool is that? Supersonic Subatomic live reload! And we’re just gettin
 ====
 We just created one template to render the new welcome page resource so you should see *404 - Resource Not Found* when you select the other menus except for _Home_. 
 
-You might see the following error in CodeReady Workspace Terminal. It happened before the new initial page(welcome.html) was rendered and it won't happen again.
+You might see the following error in VS Code Terminal. It happened before the new initial page(welcome.html) was rendered and it won't happen again.
 
 [source,console]
 ----
