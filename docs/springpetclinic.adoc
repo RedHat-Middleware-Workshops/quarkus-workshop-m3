@@ -110,20 +110,19 @@ INFO 326 --- [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Comple
 
 The Spring Boot application should be running with _8081_ port because you will initialize _8080_ port to run a Quarkus application later.
 
-VS Code will also detect that the Quarkus app opens port `8081` for web requests. When prompted, *open the port `8081`*, which opens a small web browser in VS Code:
+VS Code will also detect that the Spring Boot app opens port `8081` for web requests. When prompted, select *Open In New Tab*, which opens a new tab in your web browser:
 
 image::open-port-spring.png[port, 700]
 
-Then select `Open Link` to redirect to the external URL of the Spring Boot application:
+[NOTE]
+====
+In case you see the popup message below, select `Open`.
 
 image::open-link-spring.png[port, 700]
+====
 
 You should see the Spring Petclinic welcome page (you may need to click the _reload_ icon):
 
 image::welcome-spring-petclinic.png[port, 900]
-
-Select the URL link at the upper right to open the same default page in a separate browser tab:
-
-image::crw-open-spring-page.png[page, 800]
 
 `leave this page/tab open` because you will go through logical views and implemented the use cases of Spring Petclinic application in the next labs.
