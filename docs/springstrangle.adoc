@@ -72,7 +72,7 @@ Open a new VS Code Terminal and run the following commands to run the vets servi
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f $PROJECT_SOURCE/quarkus-petclinic-vets-service
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
 ----
 
 [NOTE]
@@ -127,7 +127,7 @@ Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in VS Code Te
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f $PROJECT_SOURCE/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f ${PROJECT_SOURCE}/quarkus-petclinic
 ----
 
 You should see in the output:
@@ -283,7 +283,7 @@ Run the following command to delete `VetsService.java` file in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
-rm -rf $PROJECT_SOURCE/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
+rm -rf ${PROJECT_SOURCE}/quarkus-petclinic/src/main/java/org/acme/service/VetsService.java
 ----
 
 The existing data in monolith Petclinic application is no longer required because the data is now managed by the new _vets service_ withe a separated database. Comment the following database entries in `import.sql` file of *quarkus-petclinic* project:
@@ -441,7 +441,7 @@ Build and deploy the `vets-service` application via running the following maven 
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-vets-service
+mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
 ----
 
 **Wait for it to finish!**. You should get a **BUILD SUCCESS** message at the end. Once that's done, make sure it's actually done rolling out:
@@ -506,7 +506,7 @@ image::vets-deployment.png[inventory_db_deployments, 700]
 
 [source, shell, role="copypaste"]
 ----
-sh $PROJECT_SOURCE/scripts/deploy-remain.sh {{ USER_ID }}
+sh ${PROJECT_SOURCE}/scripts/deploy-remain.sh {{ USER_ID }}
 ----
 
 [NOTE]
@@ -515,7 +515,7 @@ You might have one or more failures (_i.e. visits-service: Failed to build quark
 
 [source, shell, role="copypaste"]
 ----
-sh $PROJECT_SOURCE/scripts/deploy-remain.sh {{ USER_ID }}
+sh ${PROJECT_SOURCE}/scripts/deploy-remain.sh {{ USER_ID }}
 ----
 ====
 

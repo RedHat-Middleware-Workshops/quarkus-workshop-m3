@@ -33,7 +33,7 @@ Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project 
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="kubernetes-config" -f $PROJECT_SOURCE/quarkus-petclinic-web-v2
+mvn quarkus:add-extension -Dextensions="kubernetes-config" -f ${PROJECT_SOURCE}/quarkus-petclinic-web-v2
 ----
 
 This extension works by reading ConfigMaps and Secrets directly from the Kubernetes API server using the https://quarkus.io/guides/kubernetes-client[Kubernetes Client^]. The extension understands the following types of ConfigMaps and Secrets as input sources:
@@ -99,7 +99,7 @@ Let's modify the Qute template to show the message that refers to OpenShift Conf
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-web-v2
+mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-web-v2
 ----
 
 When the build and deployment complete, the app will be rolled out to OpenShift. You can watch it until it completes by running the following in the VS Code Terminal:
@@ -182,7 +182,7 @@ The `call()` method exposes an HTTP GET endpoint which will return the status of
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f $PROJECT_SOURCE/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
+mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
 ----
 
 When the build completes, the app is deployed to OpenShift. Access the health endpoint again using _curl_ and the result looks like:

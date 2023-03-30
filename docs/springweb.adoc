@@ -32,7 +32,7 @@ Open a new terminal in VS Code then run the following `mvn` (Maven) commands to 
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -f $PROJECT_SOURCE/quarkus-petclinic
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -f ${PROJECT_SOURCE}/quarkus-petclinic
 ----
 
 Leave this terminal window open throughout the lab! You will complete the entire lab without shutting down Quarkus Live Coding mode, so be careful not to close the tab (if you do, you re-run it). This is very useful for quick experimentation.

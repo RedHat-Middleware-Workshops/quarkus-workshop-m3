@@ -93,7 +93,7 @@ Open a new VS Code Terminal (taking care not to close the other terminals runnin
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f $PROJECT_SOURCE/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f ${PROJECT_SOURCE}/quarkus-petclinic
 ----
 
 You should see:
