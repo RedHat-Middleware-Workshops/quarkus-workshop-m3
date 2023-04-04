@@ -31,7 +31,7 @@ image::spring-petclinic-diagram.png[spring, 700]
 If you’ve already completed other labs today then you need to *delete* an exiting workspace in Red Hat OpenShift Dev Spaces.
 ====
 
-You will be using VS Code server based on https://developers.redhat.com/products/openshift-dev-spaces/overview[Red Hat OpenShift Dev Spaces] **Changes to files are auto-saved every few seconds**, so you don't need to explicitly save changes.
+You will be using VS Code server based on https://developers.redhat.com/products/openshift-dev-spaces/overview[Red Hat OpenShift Dev Spaces^] **Changes to files are auto-saved every few seconds**, so you don't need to explicitly save changes.
 
 To get started, {{ DS_URL }}[access the Red Hat OpenShift Dev Spaces instance^] and select *Log in with OpenShift* button:
 
