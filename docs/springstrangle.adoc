@@ -425,6 +425,7 @@ Build and deploy the `vets-service` application via running the following maven 
 
 [source,sh,role="copypaste"]
 ----
+oc project {{ USER_ID }}-project &&
 mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
 ----
 
