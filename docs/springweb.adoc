@@ -45,6 +45,7 @@ The first time you build the app, new dependencies may be downloaded via maven. 
 [NOTE]
 ====
 You may see WARNINGs like `Unrecognized configuration key` or `Duplicate entry`. These are configuration values that will take effect later on and can be safely ignored for now.
+Occasionally you may get an error (e.g. `NullPointerException`) during Live Reloading. In this case, simply close the terminal and restart live coding using the task.
 ====
 
 You should see:
@@ -64,7 +65,7 @@ Note the amazingly fast startup time! The app is now running *locally* (within t
 
 You can also see *Tests paused* by default when a Quarkus application gets started. Learn more details on https://youtu.be/NwODFFDZcNY[Quarkus Continuous Testing Video].
 
-CodeReady will also detect that the Quarkus app opens port `5005` (for debugging) and `8080` (for web requests). *Do not open port 5005*, but when prompted, *open the port `8080`*, which opens a small web browser in CodeReady:
+VS Code will also detect that the Quarkus app opens port `5005` (for debugging) and `8080` (for web requests). *Do not open port 5005*, but when prompted, *open the port `8080`*, which opens a small web browser in CodeReady:
 
 image::open-port.png[port, 700]
 
