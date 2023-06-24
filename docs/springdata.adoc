@@ -121,8 +121,8 @@ Add the following variables to set the database connection details(JDBC url, dat
 %dev.quarkus.datasource.jdbc.driver=org.h2.Driver
 %dev.quarkus.datasource.username=petclinic
 %dev.quarkus.datasource.password=mysecretpassword
-%dev.quarkus.datasource.max-size=8
-%dev.quarkus.datasource.min-size=2
+%dev.quarkus.datasource.jdbc.max-size=8
+%dev.quarkus.datasource.jdbc.min-size=2
 %dev.quarkus.hibernate-orm.database.generation=drop-and-create
 %dev.quarkus.hibernate-orm.log.sql=false
 ----
