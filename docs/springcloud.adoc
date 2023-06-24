@@ -10,7 +10,7 @@ A frequently asked question is *how does Quarkus with OpenShift handle the Sprin
 
 Quarkus includes the https://quarkus.io/guides/kubernetes-config[kubernetes-config^] extension, which allows developers to use Kubernetes https://cloud.google.com/kubernetes-engine/docs/concepts/configmap[ConfigMaps^] and https://cloud.google.com/kubernetes-engine/docs/concepts/secret[Secrets^] as configuration sources, without having to mount them into the Pod running the Quarkus application. This *configuration management* traditionally can be managed by https://spring.io/projects/spring-cloud-config[Spring Cloud Config^] and https://www.consul.io/[Consul^].
 
-In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/k8s/ns/{{ USER_ID }}-project/core~v1~ConfigMap[Config Maps^] in Developer Console, then select `Create Config Map`:
+In this step, we'll use a ConfigMap to handle this capability. Go to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project?view=graph[Topology^] in Developer Console, then select `Create Config Map`:
 
 image::create-configmap.png[configmap.png, 900]
 
