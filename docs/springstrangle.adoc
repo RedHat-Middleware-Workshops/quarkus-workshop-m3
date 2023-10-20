@@ -64,7 +64,7 @@ Also, don’t forget to add the import statement by un-commenting the import sta
 [source,java]
 ----
 import java.util.List;
-import javax.ws.rs.GET;
+import jakarta.ws.rs.GET;
 import org.acme.model.Vet;
 ----
 
@@ -153,10 +153,10 @@ package org.acme.client;
 
 import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 
 import org.acme.model.Vet;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
@@ -182,7 +182,7 @@ Open `application.properties` file in `src/main/resources` of *quarkus-petclinic
 [source,shell,role="copypaste"]
 ----
 %dev.org.acme.client.VetsRestClient/mp-rest/url=http://localhost:7070 // <1>
-%dev.org.acme.client.VetsRestClient/mp-rest/scope=javax.inject.Singleton // <2>
+%dev.org.acme.client.VetsRestClient/mp-rest/scope=jakarta.inject.Singleton // <2>
 ----
 
 <1> All requests performed using _VetsRestClient_ will use http://localhost:7070 as the base URL. Using the configuration above, calling the _getAll()_ method of _VetsRestClient_ would result in an HTTP GET request being made to http://localhost:7070/vets. 

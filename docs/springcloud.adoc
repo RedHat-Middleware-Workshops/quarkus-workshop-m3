@@ -159,8 +159,8 @@ Let’s fill in the class by creating a new RESTful endpoint which will be used 
 ----
 package org.acme.rest;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.acme.service.OwnersService;
 import org.eclipse.microprofile.health.HealthCheck;
