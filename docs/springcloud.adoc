@@ -139,13 +139,6 @@ The output shows:
       "data": {
         "<default>": "UP"
       }
-    },
-    {
-      "name": "Database connections health check",
-      "status": "UP",
-      "data": {
-        "<default>": "UP"
-      }
     }
   ]
 }
@@ -212,17 +205,6 @@ The result should be:
     {
       "name": "Success of Owners Health Check!!!",
       "status": "UP"
-    },
-    {
-      "name": "Success of Owners Health Check!!!",
-      "status": "UP"
-    },
-    {
-      "name": "Database connections health check",
-      "status": "UP",
-      "data": {
-        "<default>": "UP"
-      }
     },
     {
       "name": "Database connections health check",
