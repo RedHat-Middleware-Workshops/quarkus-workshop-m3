@@ -93,7 +93,7 @@ Open a new VS Code Terminal (taking care not to close the other terminals runnin
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-h2" -f ${PROJECT_SOURCE}/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="hibernate-orm-panache, jdbc-postgresql" -f ${PROJECT_SOURCE}/quarkus-petclinic
 ----
 
 You should see:
@@ -101,30 +101,37 @@ You should see:
 [source,console]
 ----
 [INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-hibernate-orm-panache has been installed
-[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-jdbc-h2 has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-jdbc-postgresql has been installed
 ----
 
-Quarkus supports the notion of _configuration profiles_. These allows you to have multiple configurations in the same file and select between then via a _profile name_.
+== Quarkus Dev Services
 
-By default Quarkus has three profiles, although it is possible to use as many as you like. The default profiles are:
+When testing or running in dev mode Quarkus can provide you with a zero-config database out of the box, a feature we refer to as *Dev Services*. Depending on your database type you may need *Docker* or *Podman* installed in order to use this feature. Dev Services is supported for the *PostgreSQL* databases. With that, you don't need to add required configurations (e.g., username, password, JDBC URL) to set up the PostgreSQL in the _application.properties_ file.
 
-* `dev` - Activated when in development mode (i.e. *quarkus:dev*)
-* `test` - Activated when running tests
-* `prod` - The default profile when not running in development or test mode
+Red Hat Dev Spaces enables you to run the Quarkus Dev Services in the terminal using the _KUBEDOCK_ tool. Unlikely local environment, you need to set the `quarkus.datasource.devservices.volumes` where the PostgreSQL's data is stored inside a container.
 
-Add the following variables to set the database connection details(JDBC url, database credentials) in `src/main/resources/application.properties`:
+when you take a look at the _src/main/resources/application.properties_, you can see the following configuration which we already added for you in advance.
 
-[source,properties,role="copypaste"]
+[source,properties]
 ----
-%dev.quarkus.datasource.db-kind=h2
-%dev.quarkus.datasource.jdbc.url=jdbc:h2:mem:default;DB_CLOSE_DELAY=-1
-%dev.quarkus.datasource.jdbc.driver=org.h2.Driver
-%dev.quarkus.datasource.username=petclinic
-%dev.quarkus.datasource.password=mysecretpassword
-%dev.quarkus.datasource.jdbc.max-size=8
-%dev.quarkus.datasource.jdbc.min-size=2
-%dev.quarkus.hibernate-orm.database.generation=drop-and-create
-%dev.quarkus.hibernate-orm.log.sql=false
+%dev.quarkus.datasource.devservices.volumes."/"=/var/lib/postgresql/
+----
+
+Find more information about the Quarkus Dev Services https://quarkus.io/guides/databases-dev-services[here^].
+
+When you take a look at the *Quarkus Dev Mode* terminal, you should see the following logs:
+
+[source,console]
+----
+Dev Services for the default datasource (postgresql) started
+----
+
+Then, execute `podman ps` in the bash terminal. You will see that a *PostgreSQL* container is running automatically.
+
+[source,console]
+----
+CONTAINER ID  IMAGE                  COMMAND     CREATED         STATUS        PORTS       NAMES
+072438308e58  docker.io/postgres:14              14 seconds ago  Healthy (Up)              072438308e580908ec04af8a93c4b803c5eac4ad401d5b0cf60aa5c3acb9fe10
 ----
 
 == Refactor Vets Persistence Layer
