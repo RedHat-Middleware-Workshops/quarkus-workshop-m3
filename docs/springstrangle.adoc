@@ -514,6 +514,11 @@ image::topology-view.png[topology-view.png, 900]
 
 Select `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. 
 
+[NOTE]
+====
+In case you can't access the web page, please make sure to access the page via `http` protocal rather than `https`. A web browser (e.g., Chrome) sometimes redirects to *https* protocal automatically.
+====
+
 Let's do a quick sanity test if new microservices are working well. Select http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
