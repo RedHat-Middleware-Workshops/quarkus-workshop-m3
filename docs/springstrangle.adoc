@@ -72,7 +72,7 @@ Open a new VS Code Terminal and run the following commands to run the vets servi
 
 [source,console,role="copypaste"]
 ----
-mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Ddebug=false -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
+mvn quarkus:dev -Dquarkus.http.host=0.0.0.0 -Dquarkus.analytics.disabled=false -Ddebug=false -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
 ----
 
 [NOTE]
