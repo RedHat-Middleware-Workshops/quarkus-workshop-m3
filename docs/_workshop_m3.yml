@@ -1,6 +1,6 @@
 ---
 id: quarkus-lab
-name: Quarkus for Spring Developers Hands-on Lab (Version 2024-04-02)
+name: Quarkus for Spring Developers Hands-on Lab (Version 2024-05-13)
 
 vars:
   ROUTE_SUBDOMAIN:
