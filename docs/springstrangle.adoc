@@ -127,7 +127,7 @@ Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in VS Code Te
 
 [source,sh,role="copypaste"]
 ----
-mvn quarkus:add-extension -Dextensions="rest-client,resteasy-jackson" -f ${PROJECT_SOURCE}/quarkus-petclinic
+mvn quarkus:add-extension -Dextensions="resteasy-client,resteasy-jackson" -f ${PROJECT_SOURCE}/quarkus-petclinic
 ----
 
 You should see in the output:
@@ -135,10 +135,10 @@ You should see in the output:
 [source,console]
 ----
 [INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-resteasy-jackson has been installed
-[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-rest-client has been installed
+[INFO] [SUCCESS] ✅  Extension io.quarkus:quarkus-resteasy-client has been installed
 ----
 
-* *quarkus-rest-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
+* *quarkus-resteasy-client* provides a Quarkus wrapper for the MicroProfile REST Client implementation
 * *quarkus-resteasy-jackson* handles automatic serialization/deserialization of Java obects to/from JSON. Quarkus also supports JSON-B as a separate dependency.
 
 Let's develop a MicroProfile REST Client for the vets service. Open `VetsRestClient.java` class file in `src/main/java/org/acme/client` in *quarkus-petclinic* project: 
@@ -435,15 +435,10 @@ mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-vets-service
 
 [source,sh,role="copypaste"]
 ----
-oc rollout status -w dc/vets-service
+oc rollout status -w deployment/vets-service
 ----
 
-[NOTE]
-====
-`dc` in `dc/vets-service` is shorthand for OpenShift's _DeploymentConfig_ object type. There are other shortcuts like `bc` for _BuildConfig_, `svc` for Kubernetes _Services_, and so on.
-====
-
-Wait for that command to report `replication controller "vets-service-1" successfully rolled out` before continuing.
+Wait for that command to report `deployment "vets-service" successfully rolled out` before continuing.
 
 And now we can access using `curl` once again. In the Terminal, run this command to access the endpoint:
 
@@ -514,12 +509,7 @@ image::topology-view.png[topology-view.png, 900]
 
 Select `Open URL` then you will see the landing page of Quarkus Petclinic application based on microservices. 
 
-[NOTE]
-====
-In case you can't access the web page, please make sure to access the page via `http` protocal rather than `https`. A web browser (e.g., Chrome) sometimes redirects to *https* protocal automatically.
-====
-
-Let's do a quick sanity test if new microservices are working well. Select http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
+Let's do a quick sanity test if new microservices are working well. Select https://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}/owners?id=6[Jean Coleman Information^] then you shoud see this:
 
 image::owners-detail-view.png[owners-detail-view.png, 900]
 
