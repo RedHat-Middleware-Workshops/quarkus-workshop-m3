@@ -106,10 +106,10 @@ When the build and deployment complete, the app will be rolled out to OpenShift.
 
 [source,sh,role="copypaste"]
 ----
-oc rollout status -w dc/petclinic-web-v2
+oc rollout status -w deployment/petclinic-web-v2
 ----
 
-Once the rollout is complete, back on the http://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
+Once the rollout is complete, back on the https://petclinic-web-v2-{{ USER_ID }}-project.{{ ROUTE_SUBDOMAIN}}[Welcome Page^] then you shoud see this:
 
 image::quarkus-welcome-configmap.png[configmap.png, 900]
 
