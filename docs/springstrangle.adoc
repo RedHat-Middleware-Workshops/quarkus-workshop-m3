@@ -123,7 +123,7 @@ The monlith web application will need to make _HTTP_ calls to the the vets servi
 
 The MicroProfile REST Client provides a type-safe approach to invoke RESTful services over HTTP. Using the MicroProfile REST Client is as simple as creating an interface using the proper JAX-RS and MicroProfile annotations.
 
-Add _quarkus-rest-client_ and _quarkus-resteasy-jackson_ extension in VS Code Terminal:
+Add _quarkus-resteasy-client_ and _quarkus-resteasy-jackson_ extension in VS Code Terminal:
 
 [source,sh,role="copypaste"]
 ----
@@ -356,6 +356,7 @@ Select *Instantiate Template* and fill in the following fields, leaving the othe
 * **PostgreSQL Connection Username**: `vets`
 * **PostgreSQL Connection Password**: `mysecretpassword`
 * **PostgreSQL Database Name**: `vets`
+* **Version of PostgreSQL Image*: `12-el8`
 
 image::db-postgres-values.png[db, 700]
 
