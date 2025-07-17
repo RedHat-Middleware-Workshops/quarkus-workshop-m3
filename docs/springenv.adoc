@@ -47,7 +47,7 @@ parts of the workshop you’re doing, you will use one or more of:
 * https://www.openshift.com/[Red Hat OpenShift^] - You’ll use one or more **projects** (Kubernetes namespaces) that are your own and are isolated from other workshop students
 * https://developers.redhat.com/products/openshift-dev-spaces/overview[Red Hat OpenShift Dev Spaces^] - based on *Eclipse Che*, it’s a cloud-based, in-browser IDE (similar to IntelliJ IDEA, VSCode, Eclipse IDE). You’ve been provisioned your own personal workspace for use with this workshop. You’ll write, test, and deploy code from here
 * https://www.redhat.com/en/topics/cloud-native-apps/what-is-quarkus[Red Hat Build of Quarkus^] - a full-stack, Kubernetes-native https://www.redhat.com/en/topics/cloud-native-apps/what-is-a-Java-framework[Java framework^] made for Java virtual machines (JVMs) and native compilation, optimizing Java specifically for containers and enabling it to become an effective platform for https://www.redhat.com/en/topics/cloud-native-apps/what-is-serverless[serverless^], https://www.redhat.com/en/topics/cloud[cloud^], and https://www.redhat.com/en/topics/containers/what-is-kubernetes[Kubernetes^] environments
-* https://access.redhat.com/documentation/en-us/red_hat_support_for_spring_boot/2.2/[Spring Boot Runtime^] - an open source Java based framework used to develop a microservice and web applications
+* https://github.com/spring-projects/spring-petclinic[Spring PetClinic Sample Application^] - open source sample application developed by the Spring Framework team to demonstrate the capabilities of Spring Boot, Spring MVC, and Spring Data Frameworks
 
 You’ll be provided clickable URLs throughout the workshop to access the services that have been installed for you.
 
