@@ -330,21 +330,21 @@ We will deploy our application to our production environment based on Kubernetes
 
 Our production environment needs a "real" database so let's deploy a Postgres database to OpenShift. Login with your assigned username and password (`{{ USER_ID }}/{{ OPENSHIFT_USER_PASSWORD }}`) in the {{ CONSOLE_URL}}[OpenShift Console^]:
 
-image::ocplogin.png[login,700]
+image::che-login.png[login,700]
 
 Once logged in, skip the tour by clicking _Skip Tour_, and then select the name of your project (`{{ USER_ID }}-project`) (it's the only project you have access to):
 
 image::ocpproj.png[project,700]
 
-Switch to the _Developer Perspective_ (if not already on it) using the upper-left drop-down:
+In the sidebar menu, switch to the Topology View using the drop-down under Workloads:
 
 image::devperspective.png[perspective, 700]
 
-click **+Add** on the left, on the _Database_ box on the project overview:
+In the sidebar menu, switch to the Software Catalog using the drop-down under Home:
 
 image::db.png[db, 700]
 
-Type in `postgres` in the search box, and select the *PostgreSQL (ephemeral)*:
+Select Database in the left-side filter column, then type in `postgres` in the search box, and select the *PostgreSQL (ephemeral)*:
 
 image::db-postgres.png[db, 700]
 
