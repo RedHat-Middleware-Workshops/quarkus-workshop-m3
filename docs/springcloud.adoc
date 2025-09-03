@@ -185,7 +185,7 @@ The `call()` method exposes an HTTP GET endpoint which will return the status of
 
 [source,sh,role="copypaste"]
 ----
-mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-customers-service && oc rollout status -w dc/customers-service
+mvn clean package -f ${PROJECT_SOURCE}/quarkus-petclinic-customers-service && oc rollout status -w deploy/customers-service
 ----
 
 When the build completes, the app is deployed to OpenShift. Access the health endpoint again using _curl_ and the result looks like:
