@@ -336,13 +336,9 @@ Once logged in, skip the tour by clicking _Skip Tour_, and then select the name 
 
 image::ocpproj.png[project,700]
 
-In the sidebar menu, switch to the Topology View using the drop-down under Workloads:
-
-image::devperspective.png[perspective, 700]
-
 In the sidebar menu, switch to the Software Catalog using the drop-down under Home:
 
-image::db.png[db, 700]
+image::db.png[db, 300]
 
 Select Database in the left-side filter column, then type in `postgres` in the search box, and select the *PostgreSQL (ephemeral)*:
 
@@ -481,7 +477,13 @@ oc label dc/vets-database app.openshift.io/runtime=postgresql --overwrite && \
 oc label dc/vets-database app.kubernetes.io/part-of=vets-app --overwrite
 ----
 
-This will deploy the new vets service to our new project. Select the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] to see it:
+This will deploy the new vets service to our new project.
+
+Switch to the {{ CONSOLE_URL }}/topology/ns/{{ USER_ID }}-project[Topology View^] using the drop-down under Workloads in the sidebar to view the results:
+
+image::devperspective.png[perspective, 500]
+
+You will see the following resources:
 
 image::vets-deployment.png[inventory_db_deployments, 700]
 
