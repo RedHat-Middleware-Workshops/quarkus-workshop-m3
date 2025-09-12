@@ -27,7 +27,7 @@ data:
   message.hello.quarkus: Kubernetes Native Java, Quarkus
 ----
 
-image::myconfigmap.png[configmap.png, 700]
+Click *Create* to establish this ConfigMap resource.
 
 Add _quarkus-kubernetes-config_ extension to `quarkus-petclinic-web-v2` project in VS Code Terminal:
 
