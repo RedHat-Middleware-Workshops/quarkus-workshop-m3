@@ -157,7 +157,7 @@ Add the following code under the `// TODO: Add TemplateInstance` comment:
 
 Now, let’s exercise the live reload capabilities of Quarkus. 
 
-Access https://{{ USER_ID }}-quarkus-workshop-quarkus-webpage.{{ ROUTE_SUBDOMAIN }}[Quarkus Petclinic Welcome Page]. It should now show the following new welcome page that you saw in the Spring Petclinic welcome page:
+Access https://{{ USER_ID }}-quarkus-workshop-quarkus-webpage.{{ ROUTE_SUBDOMAIN }}[Quarkus Petclinic Welcome Page^]. It should now show the following new welcome page that you saw in the Spring Petclinic welcome page:
 
 image::quarkus-petclinic-home.png[quarkus-petclinic, 900]
 
