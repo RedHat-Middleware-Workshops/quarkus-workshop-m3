@@ -147,7 +147,7 @@ Then, execute `podman ps` in the bash terminal. You will see that a *PostgreSQL*
 [source,console]
 ----
 CONTAINER ID  IMAGE                  COMMAND     CREATED         STATUS        PORTS       NAMES
-072438308e58  docker.io/postgres:14              14 seconds ago  Healthy (Up)              072438308e580908ec04af8a93c4b803c5eac4ad401d5b0cf60aa5c3acb9fe10
+70d1d1201cc1  docker.io/postgres:17              14 seconds ago  Unhealthy (created)              072438308e580908ec04af8a93c4b803c5eac4ad401d5b0cf60aa5c3acb9fe10
 ----
 
 == Refactor Vets Persistence Layer
