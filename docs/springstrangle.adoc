@@ -336,9 +336,7 @@ Once logged in, skip the tour by clicking _Skip Tour_, and then select the name 
 
 image::ocpproj.png[project,700]
 
-In the sidebar menu, switch to the Software Catalog using the drop-down under Home:
-
-image::db.png[db, 300]
+In the sidebar menu, switch to the Software Catalog using the drop-down under Home.
 
 Select Database in the left-side filter column, then type in `postgres` in the search box, and select the *PostgreSQL (ephemeral)*:
 
@@ -352,7 +350,7 @@ Select *Instantiate Template* and fill in the following fields, leaving the othe
 * **PostgreSQL Connection Username**: `vets`
 * **PostgreSQL Connection Password**: `mysecretpassword`
 * **PostgreSQL Database Name**: `vets`
-* **Version of PostgreSQL Image*: `12-el8`
+* **Version of PostgreSQL Image*: `15-el8`
 
 image::db-postgres-values.png[db, 700]
 
